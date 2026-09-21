@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISMS - Integrated Student Management System</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="app-body">
+
+
+    <div id="toast-container" class="toast-container"></div>
+
+
+    <div id="app" class="app-container">
+
+
+        <script>
+            (function () {
+                try {
+                    var user = localStorage.getItem("isms_current_user");
+                    if (user && JSON.parse(user)) {
+                        document.write('<style id="auth-state-override-style">#auth-screen{display:none !important;}#main-screen{display:flex !important;}</style>');
+                    }
+                } catch (e) { }
+            })();
+        </script>
+        <div id="auth-screen" class="auth-screen">
+            <div class="auth-card">
+                <div class="auth-header">
+
+                    <div class="auth-logo-wrapper">
+                        <img src="gctu_logo.png" alt="GCTU ISMS Logo" class="auth-institution-logo"
+                            onerror="this.onerror=null; this.style.display='none'; this.insertAdjacentHTML('afterend','<div style=\'display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.3rem;color:var(--brand-primary);\'><i class=\'fa-solid fa-graduation-cap\'></i> GCTU</div>');">
+                    </div>
+                    <h2>Integrated Student Management System</h2>
+                    <p>Automated Core Academic & Administrative Platform</p>
+                </div>
+
+
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="tab-login-btn" onclick="authView.switchAuthTab('login')">Sign
+                        In</button>
+                    <button class="auth-tab" id="tab-register-btn" onclick="authView.switchAuthTab('register')">Register
+                        New Account</button>
+                </div>
+
+
+                <form id="login-form" class="auth-form active" onsubmit="authView.handleLogin(event)">
+                    <div class="form-group">
+                        <label for="login-role">Select Access Portal Role *</label>
+                        <select id="login-role" class="form-control" onchange="authView.updateLoginPlaceholder()">
+                            <option value="student">Student Portal</option>
+                            <option value="teacher">Lecturer / Teacher Portal</option>
+                            <option value="parent">Parent / Guardian Portal</option>
+                            <option value="admin">System / Sub-Administrator</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="login-identifier-label" for="login-identifier">Student ID</label>
+                        <div class="input-icon-wrapper">
+                            <i class="fa-solid fa-id-badge input-icon"></i>
+                            <input type="text" id="login-identifier" class="form-control" placeholder="e.g. 4211260001"
+                                oninput="authView.validateLoginIdentifierRealtime()" required>
+                        </div>
+                        <small id="login-identifier-error" class="input-error-msg hidden"></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="login-secret-label" for="login-password">Password</label>
+                        <div class="input-icon-wrapper">
+                            <i id="login-secret-icon" class="fa-solid fa-lock input-icon"></i>
+                            <input type="password" id="login-password" class="form-control" placeholder="••••••••"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="auth-options-row">
+                        <div class="remember-me-group">
+                            <input type="checkbox" id="remember-me">
+                            <label for="remember-me">Remember session</label>
+                        </div>
+                        <div class="forgot-pass-group">
+                            <a href="#" class="auth-link"
+                                onclick="authView.handleForgotPassword(); return false;">Forgot Credentials?</a>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i class="fa-solid fa-right-to-bracket"></i> Sign In to Account
+                    </button>
+
+
+
+                    <div class="auth-switch-prompt">
+                        <span>Don't have an account?</span>
+                        <a href="#" class="auth-link-bold"
+                            onclick="authView.switchAuthTab('register'); return false;">Register</a>
+                    </div>
+                </form>
+
+
+                <div id="register-wrapper" class="auth-form hidden">
+                    <div class="role-selector-pills">
+                        <button type="button" class="pill-btn active" id="reg-role-student-btn"
+                            onclick="authView.setRegisterRole('student')">Student Registration</button>
+                        <button type="button" class="pill-btn" id="reg-role-teacher-btn"
+                            onclick="authView.setRegisterRole('teacher')">Teacher Registration</button>
+                        <button type="button" class="pill-btn" id="reg-role-parent-btn"
+                            onclick="authView.setRegisterRole('parent')">Parent Registration</button>
+                    </div>
+
+
+                    <form id="student-reg-form" class="reg-subform active"
+                        onsubmit="authView.handleStudentRegister(event)">
+                        <div class="form-row">
+                            <div class="form-group col-4">
+                                <label for="st-fname">First Name *</label>
+                                <input type="text" id="st-fname" class="form-control" placeholder="Abena" required>
+                            </div>
+                            <div class="form-group col-4">
+                                <label for="st-sname">Surname *</label>
+                                <input type="text" id="st-sname" class="form-control" placeholder="Appiah" required>
+                            </div>
+                            <div class="form-group col-4">
+                                <label for="st-onames">Other Names</label>
+                                <input type="text" id="st-onames" class="form-control" placeholder="Osei">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="st-id">Student ID * <small class="text-muted">(Max 10 chars)</small></label>
+                                <input type="text" id="st-id" class="form-control" placeholder="4211260001"
+                                    maxlength="10" required>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="st-phone">Phone Number *</label>
+                                <input type="tel" id="st-phone" class="form-control" placeholder="+233241234567"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="st-dob">Date of Birth *</label>
+                                <input type="date" id="st-dob" class="form-control" max="2026-09-09" required>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="st-email">Valid Email Address *</label>
+                                <input type="email" id="st-email" class="form-control" placeholder="student@isms.edu.gh"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="st-address">Residential Address *</label>
+                            <input type="text" id="st-address" class="form-control"
+                                placeholder="e.g. House No. 12, Ring Road East, Accra" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-4">
+                                <label for="st-programme">Programme *</label>
+                                <select id="st-programme" class="form-control" required>
+                                    <option value="">-- Select Programme --</option>
+                                    <option value="BSc. Information Technology">BSc. Information Technology</option>
+                                    <option value="BSc. Computer Science">BSc. Computer Science</option>
+                                    <option value="BSc. Software Engineering">BSc. Software Engineering</option>
+                                    <option value="BSc. Data Science and Analytics">BSc. Data Science and Analytics
+                                    </option>
+                                    <option value="BSc. Mobile Computing">BSc. Mobile Computing</option>
+                                    <option value="BSc. Information Systems">BSc. Information Systems</option>
+                                    <option value="BSc. Networking and Systems Administration">BSc. Networking and
+                                        Systems Administration</option>
+                                    <option value="BSc. Internet of Things and Big Data">BSc. Internet of Things and Big
+                                        Data</option>
+                                    <option value="BSc. Web Application Development">BSc. Web Application Development
+                                    </option>
+                                    <option value="BSc. Telecommunication Engineering">BSc. Telecommunication
+                                        Engineering</option>
+                                    <option value="BSc. Computer Engineering">BSc. Computer Engineering</option>
+                                    <option value="BSc. Electrical and Electronics Engineering">BSc. Electrical and
+                                        Electronics Engineering</option>
+                                    <option value="BSc. Mathematics">BSc. Mathematics</option>
+                                    <option value="BSc. Actuarial Science with Data Analytics">BSc. Actuarial Science
+                                        with Data Analytics</option>
+                                    <option value="BSc. Computational Statistics">BSc. Computational Statistics</option>
+                                    <option value="BSc. Business Administration">BSc. Business Administration</option>
+                                    <option value="BSc. Accounting with Computing">BSc. Accounting with Computing
+                                    </option>
+                                    <option value="BSc. Economics">BSc. Economics</option>
+                                    <option value="BSc. Procurement and Logistics">BSc. Procurement and Logistics
+                                    </option>
+                                    <option value="BSc. E-Commerce and Marketing Management">BSc. E-Commerce and
+                                        Marketing Management</option>
+                                    <option value="BSc. Financial Technology">BSc. Financial Technology</option>
+                                    <option value="Diploma in Information Technology">Diploma in Information Technology
+                                    </option>
+                                    <option value="Diploma in Cyber Security">Diploma in Cyber Security</option>
+                                    <option value="Diploma in Computer Science">Diploma in Computer Science</option>
+                                    <option value="Diploma in Web Application Development and Multimedia Technology">
+                                        Diploma in Web Application Development and Multimedia Technology</option>
+                                    <option value="Diploma in Data Science and Analytics">Diploma in Data Science and
+                                        Analytics</option>
+                                    <option value="Diploma in Telecommunications Engineering">Diploma in
+                                        Telecommunications Engineering</option>
+                                    <option value="Diploma in Public Relations and Administration">Diploma in Public
+                                        Relations and Administration</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-4">
+                                <label for="st-level">Level *</label>
+                                <select id="st-level" class="form-control" required>
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                    <option value="300">300</option>
+                                    <option value="400">400</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-4">
+                                <label for="st-session">Session *</label>
+                                <select id="st-session" class="form-control" required>
+                                    <option value="Morning">Morning</option>
+                                    <option value="Afternoon">Afternoon</option>
+                                    <option value="Evening">Evening</option>
+                                    <option value="Weekend">Weekend</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="st-pass">Password * <small class="text-muted">(Min 6, 1 Upper, 1 Num, 1
+                                        Symbol)</small></label>
+                                <input type="password" id="st-pass" class="form-control" placeholder="••••••••"
+                                    required>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="st-pass-repeat">Repeat Password *</label>
+                                <input type="password" id="st-pass-repeat" class="form-control" placeholder="••••••••"
+                                    required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-block btn-lg">
+                            <i class="fa-solid fa-user-plus"></i> Complete Student Registration
+                        </button>
+
+
+                        <div class="auth-switch-prompt">
+                            <span>Already have an account?</span>
+                            <a href="#" class="auth-link-bold"
+                                onclick="authView.switchAuthTab('login'); return false;">Sign In</a>
+                        </div>
+                    </form>
+
+
+                    <form id="teacher-reg-form" class="reg-subform hidden"
+                        onsubmit="authView.handleTeacherRegister(event)">
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="tc-fullname">Full Name *</label>
+                                <input type="text" id="tc-fullname" class="form-control"
+                                    placeholder="Prof. Emanuel Boakye" required>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="tc-staffid">Staff ID * <small class="text-muted">(Max 8
+                                        chars)</small></label>
+                                <input type="text" id="tc-staffid" class="form-control" placeholder="STF23001"
+                                    maxlength="8" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="tc-email">Valid Email Address *</label>
+                                <input type="email" id="tc-email" class="form-control" placeholder="teacher@isms.edu.gh"
+                                    required>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="tc-phone">Phone Number *</label>
+                                <input type="tel" id="tc-phone" class="form-control" placeholder="+233241234568"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="tc-qualification">Qualifications *</label>
+                                <select id="tc-qualification" class="form-control" required>
+                                    <option value="Diploma">Diploma</option>
+                                    <option value="Degree">Degree</option>
+                                    <option value="Masters">Masters</option>
+                                    <option value="PhD">PhD</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="tc-session">Session *</label>
+                                <select id="tc-session" class="form-control" required>
+                                    <option value="Morning">Morning</option>
+                                    <option value="Afternoon">Afternoon</option>
+                                    <option value="Evening">Evening</option>
+                                    <option value="Weekend">Weekend</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="tc-pass">Password * <small class="text-muted">(Min 6, 1 Upper, 1 Num, 1
+                                        Symbol)</small></label>
+                                <input type="password" id="tc-pass" class="form-control" placeholder="••••••••"
+                                    required>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="tc-pass-repeat">Repeat Password *</label>
+                                <input type="password" id="tc-pass-repeat" class="form-control" placeholder="••••••••"
+                                    required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-block btn-lg">
+                            <i class="fa-solid fa-user-plus"></i> Complete Teacher Registration
+                        </button>
+
+                        <div class="auth-switch-prompt">
+                            <span>Already have an account?</span>
+                            <a href="#" class="auth-link-bold"
+                                onclick="authView.switchAuthTab('login'); return false;">Sign In</a>
+                        </div>
+                    </form>
+
+
+                    <form id="parent-reg-form" class="reg-subform hidden"
+                        onsubmit="authView.handleParentRegister(event)">
+                        <div class="form-group">
+                            <label for="pr-fullname">Full Name *</label>
+                            <input type="text" id="pr-fullname" class="form-control" placeholder="Mr. Kofi Osei Appiah"
+                                required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="pr-email">Valid Email Address *</label>
+                                <input type="email" id="pr-email" class="form-control" placeholder="parent@isms.edu.gh"
+                                    required>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="pr-phone">Phone Number *</label>
+                                <input type="tel" id="pr-phone" class="form-control" placeholder="+233241234569"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="pr-pass">Password * <small class="text-muted">(Min 6, 1 Upper, 1 Num, 1
+                                        Symbol)</small></label>
+                                <input type="password" id="pr-pass" class="form-control" placeholder="••••••••"
+                                    required>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="pr-pass-repeat">Repeat Password *</label>
+                                <input type="password" id="pr-pass-repeat" class="form-control" placeholder="••••••••"
+                                    required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-block btn-lg">
+                            <i class="fa-solid fa-user-plus"></i> Complete Parent Registration
+                        </button>
+
+                        <div class="auth-switch-prompt">
+                            <span>Already have an account?</span>
+                            <a href="#" class="auth-link-bold"
+                                onclick="authView.switchAuthTab('login'); return false;">Sign In</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Sidebar backdrop overlay for mobile -->
+        <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="app.closeSidebar()"></div>
+
+        <div id="main-screen" class="main-screen hidden">
+
+
+            <aside id="sidebar" class="sidebar">
+                <div class="sidebar-header">
+                    <div class="brand">
+                        <img src="gctu_logo.png" alt="GCTU" style="width: 32px; height: 32px; object-fit: contain;">
+                        <span class="brand-text">ISMS PORTAL</span>
+                    </div>
+                    <button class="mobile-close-btn" onclick="app.toggleSidebar()"><i
+                            class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <div class="user-brief-card">
+                    <div class="brief-avatar-container">
+                        <img id="brief-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
+                            alt="Profile Avatar" class="brief-avatar">
+                    </div>
+                    <div class="brief-info">
+                        <h4 id="brief-name">Abena Appiah</h4>
+                        <p id="brief-sub">ID: 4211260001</p>
+                    </div>
+                </div>
+
+
+                <nav id="nav-menu" class="nav-menu">
+
+                </nav>
+
+                <div class="sidebar-footer">
+                    <button class="btn btn-outline-danger btn-block" onclick="authView.logout()">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+                    </button>
+                </div>
+            </aside>
+
+
+            <main class="main-content">
+
+
+                <header class="topbar">
+                    <div class="topbar-left">
+                        <button class="mobile-toggle-btn" onclick="app.toggleSidebar()"><i
+                                class="fa-solid fa-bars"></i></button>
+                    </div>
+
+                    <div class="topbar-center">
+                        <h2 id="page-title" class="page-title">Dashboard Overview</h2>
+                        <div class="live-clock-container">
+                            <span class="clock-time" id="live-clock-time"><i class="fa-regular fa-clock"></i> --:--:--
+                                --</span>
+                            <span class="clock-date" id="live-clock-date">-- ---- ----</span>
+                            <button class="btn-calendar-trigger" onclick="app.toggleCalendarModal()"
+                                title="View Academic Calendar">
+                                <i class="fa-solid fa-calendar-days"></i> Calendar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="topbar-right">
+                        <button class="theme-toggle-btn" onclick="app.toggleTheme()" title="Toggle Dark/Light Mode">
+                            <i id="theme-icon" class="fa-solid fa-moon"></i>
+                        </button>
+
+                        <div id="topbar-notification-wrapper" class="notification-wrapper"
+                            onclick="app.openSystemMessagesModal()" title="View System Messages & Real-Time Alerts">
+                            <button class="topbar-icon-btn">
+                                <i class="fa-solid fa-bell"></i>
+                                <span id="notification-badge" class="badge-dot hidden">0</span>
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+
+                <div id="view-container" class="view-container">
+
+                </div>
+
+            </main>
+        </div>
+
+    </div>
+
+
+    <div id="forgot-pass-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-key" style="color: var(--brand-primary);"></i> Reset Account Password</h3>
+                <button class="modal-close" onclick="app.closeModal('forgot-pass-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="forgot-pass-step1">
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">
+                        Enter the valid email address associated with your account. A password reset authorization code
+                        will be dispatched to your inbox.
+                    </p>
+                    <form onsubmit="authView.handleSendResetLink(event)">
+                        <div class="form-group">
+                            <label for="reset-email">Registered Email Address *</label>
+                            <input type="email" id="reset-email" class="form-control" placeholder="user@isms.edu.gh"
+                                required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">
+                            <i class="fa-solid fa-paper-plane"></i> Send Password Reset Link
+                        </button>
+                    </form>
+                </div>
+
+                <div id="forgot-pass-step2" class="hidden">
+                    <div
+                        style="background: var(--status-success-bg); color: var(--status-success); padding: 12px; border-radius: var(--radius-md); font-size: 0.85rem; margin-bottom: 16px;">
+                        <i class="fa-solid fa-circle-check"></i> Verification link dispatched! Enter your new password
+                        below to reset your account.
+                    </div>
+                    <form onsubmit="authView.handleCompletePasswordReset(event)">
+                        <div class="form-group">
+                            <label for="reset-new-pass">New Password * <small class="text-muted">(Min 6, 1 Upper, 1 Num,
+                                    1 Symbol)</small></label>
+                            <input type="password" id="reset-new-pass" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reset-new-pass-repeat">Repeat New Password *</label>
+                            <input type="password" id="reset-new-pass-repeat" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block btn-lg">
+                            <i class="fa-solid fa-lock"></i> Save New Password & Return to Sign In
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="profile-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-pen"></i> Edit Profile & Upload Avatar</h3>
+                <button class="modal-close" onclick="app.closeModal('profile-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="profile-edit-form" onsubmit="app.saveProfileChanges(event)">
+                    <div class="avatar-upload-section">
+                        <img id="modal-avatar-preview" src="" alt="Avatar Preview" class="avatar-preview-img">
+                        <div class="avatar-actions">
+                            <label for="avatar-file-input" class="btn btn-sm btn-outline-primary">
+                                <i class="fa-solid fa-upload"></i> Upload Photo
+                            </label>
+                            <input type="file" id="avatar-file-input" accept="image/*" class="hidden"
+                                onchange="app.handleAvatarUpload(event)">
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                onclick="app.deleteAvatarPhoto()">
+                                <i class="fa-solid fa-trash"></i> Delete Photo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-full-name">Full Name</label>
+                        <input type="text" id="modal-full-name" class="form-control" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="modal-email">Email Address</label>
+                            <input type="email" id="modal-email" class="form-control" required readonly>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="modal-phone">Phone Number</label>
+                            <input type="tel" id="modal-phone" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Save Profile Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="payment-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-credit-card"></i> Make Semester Fee Payment</h3>
+                <button class="modal-close" onclick="app.closeModal('payment-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="fee-payment-form" onsubmit="studentView.processFeePayment(event)">
+                    <div class="fee-summary-box"
+                        style="background: rgba(37,99,235,0.07); border: 1px solid rgba(37,99,235,0.25); border-radius: var(--radius-md); padding: 14px; margin-bottom: 16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:0.9rem; color:var(--text-secondary);">Outstanding Balance:</span>
+                            <strong id="modal-fee-balance" style="font-size:1.2rem; color:var(--status-danger);">GHS
+                                2,500.00</strong>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="payment-amount">Payment Amount (GHS) *</label>
+                        <input type="number" id="payment-amount" class="form-control" min="1" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="payment-gateway">Select Payment Gateway / Method *</label>
+                        <select id="payment-gateway" class="form-control" required
+                            onchange="studentView.togglePaymentAccountField()">
+                            <option value="Paystack">💳 Paystack (Card, MoMo & Bank)</option>
+                            <option value="Bank Transfer">🏦 Bank Transfer (GCB, Ecobank, Zenith)</option>
+                            <option value="MTN Mobile Money">📱 MTN Mobile Money Wallet</option>
+                            <option value="Telecel Cash">📱 Telecel Cash Wallet</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="payment-account-group">
+                        <label for="payment-account-num">Account / Phone Number <small class="text-muted">(Required for
+                                MoMo/Bank)</small></label>
+                        <input type="text" id="payment-account-num" class="form-control" placeholder="+233241234567">
+                    </div>
+
+                    <div id="paystack-info-box"
+                        style="background: rgba(16,185,129,0.07); border:1px solid rgba(16,185,129,0.25); border-radius:var(--radius-md); padding:12px; margin-bottom:14px; font-size:0.85rem; color:var(--text-secondary);">
+                        <i class="fa-solid fa-shield-halved" style="color:var(--status-success);"></i>
+                        <strong>Paystack Secure Checkout</strong> — You will be redirected to Paystack's secure payment
+                        page to complete your transaction. All transactions are PCI-DSS compliant and 256-bit encrypted.
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-block btn-lg">
+                        <i class="fa-solid fa-lock"></i> Authorize &amp; Pay Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="printable-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-file-pdf"></i> Official Document PDF Preview</h3>
+                <div class="modal-header-actions">
+                    <button class="btn btn-sm btn-primary" onclick="pdfHelper.printCurrentDocument()">
+                        <i class="fa-solid fa-print"></i> Print / Save as PDF
+                    </button>
+                    <button class="modal-close" onclick="app.closeModal('printable-modal')">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="printable-document-content" class="printable-document"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="admin-edit-user-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-gear" style="color: var(--brand-primary);"></i> Admin Edit User
+                    Information</h3>
+                <button class="modal-close" onclick="app.closeModal('admin-edit-user-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="admin-user-edit-form" onsubmit="adminView.saveAdminUserEdit(event)">
+                    <input type="hidden" id="adm-user-type">
+                    <input type="hidden" id="adm-user-id">
+
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="adm-user-name">Full Name *</label>
+                            <input type="text" id="adm-user-name" class="form-control" required>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="adm-user-email">Email Address *</label>
+                            <input type="email" id="adm-user-email" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="adm-user-phone">Phone Number *</label>
+                            <input type="tel" id="adm-user-phone" class="form-control" required>
+                        </div>
+                        <div class="form-group col-6" id="adm-custom-id-group">
+                            <label id="adm-custom-id-label" for="adm-custom-id">Student / Staff ID</label>
+                            <input type="text" id="adm-custom-id" class="form-control">
+                        </div>
+                    </div>
+
+
+                    <div id="adm-student-fields" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group col-4">
+                                <label for="adm-st-programme">Programme</label>
+                                <select id="adm-st-programme" class="form-control">
+                                    <option value="BSc. Information Technology">BSc. Information Technology</option>
+                                    <option value="BSc. Computer Science">BSc. Computer Science</option>
+                                    <option value="BSc. Software Engineering">BSc. Software Engineering</option>
+                                    <option value="BSc. Data Science and Analytics">BSc. Data Science and Analytics
+                                    </option>
+                                    <option value="BSc. Mobile Computing">BSc. Mobile Computing</option>
+                                    <option value="BSc. Information Systems">BSc. Information Systems</option>
+                                    <option value="BSc. Networking and Systems Administration">BSc. Networking and
+                                        Systems Administration</option>
+                                    <option value="BSc. Internet of Things and Big Data">BSc. Internet of Things and Big
+                                        Data</option>
+                                    <option value="BSc. Web Application Development">BSc. Web Application Development
+                                    </option>
+                                    <option value="BSc. Telecommunication Engineering">BSc. Telecommunication
+                                        Engineering</option>
+                                    <option value="BSc. Computer Engineering">BSc. Computer Engineering</option>
+                                    <option value="BSc. Electrical and Electronics Engineering">BSc. Electrical and
+                                        Electronics Engineering</option>
+                                    <option value="BSc. Mathematics">BSc. Mathematics</option>
+                                    <option value="BSc. Actuarial Science with Data Analytics">BSc. Actuarial Science
+                                        with Data Analytics</option>
+                                    <option value="BSc. Computational Statistics">BSc. Computational Statistics</option>
+                                    <option value="BSc. Business Administration">BSc. Business Administration</option>
+                                    <option value="BSc. Accounting with Computing">BSc. Accounting with Computing
+                                    </option>
+                                    <option value="BSc. Economics">BSc. Economics</option>
+                                    <option value="BSc. Procurement and Logistics">BSc. Procurement and Logistics
+                                    </option>
+                                    <option value="BSc. E-Commerce and Marketing Management">BSc. E-Commerce and
+                                        Marketing Management</option>
+                                    <option value="BSc. Financial Technology">BSc. Financial Technology</option>
+                                    <option value="Diploma in Information Technology">Diploma in Information Technology
+                                    </option>
+                                    <option value="Diploma in Cyber Security">Diploma in Cyber Security</option>
+                                    <option value="Diploma in Computer Science">Diploma in Computer Science</option>
+                                    <option value="Diploma in Web Application Development and Multimedia Technology">
+                                        Diploma in Web Application Development and Multimedia Technology</option>
+                                    <option value="Diploma in Data Science and Analytics">Diploma in Data Science and
+                                        Analytics</option>
+                                    <option value="Diploma in Telecommunications Engineering">Diploma in
+                                        Telecommunications Engineering</option>
+                                    <option value="Diploma in Public Relations and Administration">Diploma in Public
+                                        Relations and Administration</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-4">
+                                <label for="adm-st-level">Level</label>
+                                <select id="adm-st-level" class="form-control">
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                    <option value="300">300</option>
+                                    <option value="400">400</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-4">
+                                <label for="adm-st-session">Session</label>
+                                <select id="adm-st-session" class="form-control">
+                                    <option value="Morning">Morning</option>
+                                    <option value="Afternoon">Afternoon</option>
+                                    <option value="Evening">Evening</option>
+                                    <option value="Weekend">Weekend</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div id="adm-teacher-fields" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group col-6">
+                                <label for="adm-tc-qual">Qualification</label>
+                                <select id="adm-tc-qual" class="form-control">
+                                    <option value="Diploma">Diploma</option>
+                                    <option value="Degree">Degree</option>
+                                    <option value="Masters">Masters</option>
+                                    <option value="PhD">PhD</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-6">
+                                <label for="adm-tc-session">Session</label>
+                                <select id="adm-tc-session" class="form-control">
+                                    <option value="Morning">Morning</option>
+                                    <option value="Afternoon">Afternoon</option>
+                                    <option value="Evening">Evening</option>
+                                    <option value="Weekend">Weekend</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 16px;">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Admin Modifications & Synchronize Individual
+                        Dashboard
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="elib-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3 id="elib-modal-title"><i class="fa-solid fa-book-bookmark" style="color: var(--brand-primary);"></i>
+                    Upload E-Material / Past Question</h3>
+                <button class="modal-close" onclick="app.closeModal('elib-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="elib-form" onsubmit="libraryView.saveMaterial(event)">
+                    <input type="hidden" id="elib-item-id">
+
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="elib-item-title">Resource Title *</label>
+                            <input type="text" id="elib-item-title" class="form-control"
+                                placeholder="e.g. 2025 Mid-Sem Past Questions & Solutions" required>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="elib-item-category">Category *</label>
+                            <select id="elib-item-category" class="form-control" required>
+                                <option value="E-Book">E-Book</option>
+                                <option value="Past Questions">Past Questions</option>
+                                <option value="Lecture Notes">Lecture Notes</option>
+                                <option value="Handout">Handout</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="elib-item-course">Course Code *</label>
+                            <select id="elib-item-course" class="form-control" required>
+                                <option value="CS301">CS301 - Software Engineering</option>
+                                <option value="CS303">CS303 - Database Systems</option>
+                                <option value="CS305">CS305 - Web Technologies</option>
+                                <option value="CS307">CS307 - Cybersecurity</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="elib-item-url">Document URL / PDF File Link *</label>
+                            <input type="text" id="elib-item-url" class="form-control"
+                                placeholder="https://isms.edu.gh/docs/past-questions-2025.pdf" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="elib-item-desc">Description / Instructions</label>
+                        <textarea id="elib-item-desc" class="form-control" rows="3"
+                            placeholder="Provide brief summary or instructions for students..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 14px;">
+                        <i class="fa-solid fa-floppy-disk"></i> Save & Publish
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="grade-change-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-to-square" style="color: var(--status-warning);"></i> Non-Silent Official
+                    Grade Change</h3>
+                <button class="modal-close" onclick="app.closeModal('grade-change-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminView.saveGradeChange(event)">
+                    <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 14px;">
+                        <strong>Audit Trail Notice:</strong> Grade changes are strictly recorded in the Audit Log with
+                        Changed By, Student ID, Previous Grade, New Grade, Reason, and Timestamp.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label>Student ID *</label>
+                            <input type="text" id="gc-student-id" class="form-control" placeholder="e.g. 4211260001"
+                                required>
+                        </div>
+                        <div class="form-group col-6">
+                            <label>Course Code *</label>
+                            <input type="text" id="gc-course-code" class="form-control" placeholder="e.g. CS301"
+                                required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label>Previous Grade *</label>
+                            <input type="text" id="gc-prev-grade" class="form-control" placeholder="e.g. C+" required>
+                        </div>
+                        <div class="form-group col-6">
+                            <label>New Grade *</label>
+                            <input type="text" id="gc-new-grade" class="form-control" placeholder="e.g. A" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Mandatory Justification / Audit Reason *</label>
+                        <textarea id="gc-reason" class="form-control" rows="3"
+                            placeholder="Provide clear reason for grade modification.." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning btn-block btn-lg" style="margin-top: 10px;">
+                        <i class="fa-solid fa-file-signature"></i> Record & Log Official Grade Change
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="add-admin-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-shield" style="color: var(--brand-primary);"></i> Provision
+                    Sub-Administrator Account</h3>
+                <button class="modal-close" onclick="app.closeModal('add-admin-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminView.saveNewAdmin(event)">
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label>Staff ID *</label>
+                            <input type="text" id="new-admin-staffid" class="form-control" placeholder="e.g. ADM-ACA-26"
+                                required readonly>
+                        </div>
+                        <div class="form-group col-6">
+                            <label>Full Name *</label>
+                            <input type="text" id="new-admin-name" class="form-control"
+                                placeholder="e.g. Mr. David Mensah" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label>Department Email *</label>
+                            <input type="email" id="new-admin-email" class="form-control"
+                                placeholder="e.g. david.mensah@isms.edu.gh" required>
+                        </div>
+                        <div class="form-group col-6">
+                            <label>Administrative Level *</label>
+                            <select id="new-admin-level" class="form-control" required
+                                onchange="adminView.updateNewAdminIdPrefix()">
+                                <option value="Registrar Admin">Registrar Admin</option>
+                                <option value="Academic Admin">Academic Admin</option>
+                                <option value="Examination Admin">Examination Admin</option>
+                                <option value="Finance Admin">Finance Admin</option>
+                                <option value="ICT / System Admin">ICT / System Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 10px;">
+                        <i class="fa-solid fa-user-plus"></i> Provision Sub-Administrator
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="edit-admin-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-pen" style="color: var(--brand-primary);"></i> Edit Sub-Administrator
+                    Details</h3>
+                <button class="modal-close" onclick="app.closeModal('edit-admin-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminView.saveEditAdmin(event)">
+                    <input type="hidden" id="edit-admin-id">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Staff ID <small class="text-muted">(Read-Only)</small></label>
+                        <input type="text" id="edit-admin-staffid" class="form-control" readonly>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Administrative Level <small class="text-muted">(Read-Only)</small></label>
+                        <p id="edit-admin-level-display" style="font-weight: 600; color: var(--brand-primary);"></p>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Full Name *</label>
+                        <input type="text" id="edit-admin-name" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label>Department Email *</label>
+                        <input type="email" id="edit-admin-email" class="form-control" required>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;"><i
+                            class="fa-solid fa-lock"></i> Permission scope can only be modified by the System
+                        Administrator.</p>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="system-messages-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-bell" style="color: var(--brand-primary);"></i> Institutional System Messages
+                    & Real-Time Alerts</h3>
+                <button class="modal-close" onclick="app.closeModal('system-messages-modal')">&times;</button>
+            </div>
+            <div id="system-messages-modal-body" class="modal-body">
+
+            </div>
+        </div>
+    </div>
+
+
+    <div id="configure-scope-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-sliders" style="color: var(--brand-primary);"></i> Configure Granted
+                    Administrative Scope</h3>
+                <button class="modal-close" onclick="app.closeModal('configure-scope-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminView.saveSubAdminScope(event)">
+                    <input type="hidden" id="scope-target-id">
+                    <input type="hidden" id="scope-target-type">
+                    <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 14px;">
+                        Configure the exact granted duties for <strong id="scope-target-name">Sub-Admin Role</strong>.
+                        The user will strictly have access only to the selected item buttons when they log in.
+                    </p>
+
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 18px;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                            <input type="checkbox" id="chk-scope-users" value="users"> 👥 User Management
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                            <input type="checkbox" id="chk-scope-academic" value="academic"> 🎓 Academic Management
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                            <input type="checkbox" id="chk-scope-elibrary" value="e-library"> 📚 E-Library Management
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                            <input type="checkbox" id="chk-scope-reg_control" value="reg_control"> 📝 Reg Control
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                            <input type="checkbox" id="chk-scope-results" value="results"> 📊 Results Audit
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                            <input type="checkbox" id="chk-scope-attendance" value="attendance"> 🕐 Attendance Oversight
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                            <input type="checkbox" id="chk-scope-finance" value="finance"> 💰 Finance Oversight
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                            <input type="checkbox" id="chk-scope-audit" value="audit"> 📋 Audit Logs
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                            <input type="checkbox" id="chk-scope-announcements" value="announcements"> 📢 Post
+                            Announcements
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                            <input type="checkbox" id="chk-scope-settings" value="settings"> ⚙️ System Settings
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                            <input type="checkbox" id="chk-scope-backup" value="backup"> 🗄️ Database Backup
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        <i class="fa-solid fa-floppy-disk"></i> Save & Apply Granted Scope
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="add-student-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-plus" style="color: var(--brand-primary);"></i> Register New Student
+                    Profile</h3>
+                <button class="modal-close" onclick="app.closeModal('add-student-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminView.saveNewStudent(event)">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>First Name</label>
+                        <input type="text" id="new-st-fname" class="form-control" required placeholder="e.g. Abena">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Surname</label>
+                        <input type="text" id="new-st-sname" class="form-control" required placeholder="e.g. Appiah">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Other Names (Optional)</label>
+                        <input type="text" id="new-st-onames" class="form-control" placeholder="e.g. Osei">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Student Index / ID</label>
+                        <input type="text" id="new-st-id" class="form-control" required placeholder="e.g. 4211260001">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Email Address</label>
+                        <input type="email" id="new-st-email" class="form-control" required
+                            placeholder="student@isms.edu.gh">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Phone Number</label>
+                        <input type="text" id="new-st-phone" class="form-control" required placeholder="+233240000000">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Academic Programme</label>
+                        <select id="new-st-programme" class="form-control">
+                            <option value="BSc. Information Technology">BSc. Information Technology</option>
+                            <option value="BSc. Computer Science">BSc. Computer Science</option>
+                            <option value="BSc. Software Engineering">BSc. Software Engineering</option>
+                            <option value="BSc. Data Science and Analytics">BSc. Data Science and Analytics</option>
+                            <option value="BSc. Mobile Computing">BSc. Mobile Computing</option>
+                            <option value="BSc. Information Systems">BSc. Information Systems</option>
+                            <option value="BSc. Networking and Systems Administration">BSc. Networking and Systems
+                                Administration</option>
+                            <option value="BSc. Internet of Things and Big Data">BSc. Internet of Things and Big Data
+                            </option>
+                            <option value="BSc. Web Application Development">BSc. Web Application Development</option>
+                            <option value="BSc. Telecommunication Engineering">BSc. Telecommunication Engineering
+                            </option>
+                            <option value="BSc. Computer Engineering">BSc. Computer Engineering</option>
+                            <option value="BSc. Electrical and Electronics Engineering">BSc. Electrical and Electronics
+                                Engineering</option>
+                            <option value="BSc. Mathematics">BSc. Mathematics</option>
+                            <option value="BSc. Actuarial Science with Data Analytics">BSc. Actuarial Science with Data
+                                Analytics</option>
+                            <option value="BSc. Computational Statistics">BSc. Computational Statistics</option>
+                            <option value="BSc. Business Administration">BSc. Business Administration</option>
+                            <option value="BSc. Accounting with Computing">BSc. Accounting with Computing</option>
+                            <option value="BSc. Economics">BSc. Economics</option>
+                            <option value="BSc. Procurement and Logistics">BSc. Procurement and Logistics</option>
+                            <option value="BSc. E-Commerce and Marketing Management">BSc. E-Commerce and Marketing
+                                Management</option>
+                            <option value="BSc. Financial Technology">BSc. Financial Technology</option>
+                            <option value="Diploma in Information Technology">Diploma in Information Technology</option>
+                            <option value="Diploma in Cyber Security">Diploma in Cyber Security</option>
+                            <option value="Diploma in Computer Science">Diploma in Computer Science</option>
+                            <option value="Diploma in Web Application Development and Multimedia Technology">Diploma in
+                                Web Application Development and Multimedia Technology</option>
+                            <option value="Diploma in Data Science and Analytics">Diploma in Data Science and Analytics
+                            </option>
+                            <option value="Diploma in Telecommunications Engineering">Diploma in Telecommunications
+                                Engineering</option>
+                            <option value="Diploma in Public Relations and Administration">Diploma in Public Relations
+                                and Administration</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label>Academic Level & Session</label>
+                        <div style="display: flex; gap: 8px;">
+                            <select id="new-st-level" class="form-control">
+                                <option value="100">Level 100</option>
+                                <option value="200">Level 200</option>
+                                <option value="300">Level 300</option>
+                                <option value="400">Level 400</option>
+                            </select>
+                            <select id="new-st-session" class="form-control">
+                                <option value="Morning">Morning</option>
+                                <option value="Afternoon">Afternoon</option>
+                                <option value="Evening">Evening</option>
+                                <option value="Weekend">Weekend</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg"><i
+                            class="fa-solid fa-user-check"></i>Create Student Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="add-teacher-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-tie" style="color: var(--brand-primary);"></i> Register New Faculty /
+                    Teacher Profile</h3>
+                <button class="modal-close" onclick="app.closeModal('add-teacher-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminView.saveNewTeacher(event)">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Full Name</label>
+                        <input type="text" id="new-tc-name" class="form-control" required
+                            placeholder="e.g. Prof. Emmanuel Mensah">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Staff ID Number</label>
+                        <input type="text" id="new-tc-staffid" class="form-control" required
+                            placeholder="e.g. STF23001">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Email Address</label>
+                        <input type="email" id="new-tc-email" class="form-control" required
+                            placeholder="teacher@isms.edu.gh">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Phone Number</label>
+                        <input type="text" id="new-tc-phone" class="form-control" required placeholder="+233241112233">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Department</label>
+                        <select id="new-tc-dept" class="form-control">
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Business Administration">Business Administration</option>
+                            <option value="Electrical Engineering">ElectricalEngineering</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label>Qualification Title</label>
+                        <input type="text" id="new-tc-qual" class="form-control"
+                            placeholder="e.g. Ph.D. Computer Science">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg"><i
+                            class="fa-solid fa-user-shield"></i> Save & Register Teacher Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="add-parent-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-users" style="color: var(--brand-primary);"></i> Register New Guardian /
+                    Parent Account</h3>
+                <button class="modal-close" onclick="app.closeModal('add-parent-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminView.saveNewParent(event)">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Guardian Full Name</label>
+                        <input type="text" id="new-pr-name" class="form-control" required
+                            placeholder="e.g. Mr. Samuel Appiah">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Email Address</label>
+                        <input type="email" id="new-pr-email" class="form-control" required
+                            placeholder="parent@isms.edu.gh">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Phone Number</label>
+                        <input type="text" id="new-pr-phone" class="form-control" required placeholder="+233249998877">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label>Linked Student ID / Index Number</label>
+                        <input type="text" id="new-pr-stuid" class="form-control" required
+                            placeholder="e.g. 4211260025">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg"><i class="fa-solid fa-user-plus"></i>
+                        Register Guardian Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="payment-verification-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-magnifying-glass-dollar" style="color: var(--brand-primary);"></i> Payment
+                    Verification & Transaction Audit Tool</h3>
+                <button class="modal-close" onclick="app.closeModal('payment-verification-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminView.runPaymentVerification(event)">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Lookup Query (Student ID or Transaction Reference)</label>
+                        <input type="text" id="pv-search-input" class="form-control" required
+                            placeholder="e.g. STU2025001 or PAY-9923182">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-search"></i> Verify
+                        Transaction Status</button>
+                </form>
+                <div id="pv-results-area" style="margin-top: 16px;"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="add-course-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-book-medical" style="color: var(--brand-primary);"></i> Add New Semester
+                    Course Module</h3>
+                <button class="modal-close" onclick="app.closeModal('add-course-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminView.saveNewCourse(event)">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Course Code</label>
+                        <input type="text" id="new-crs-code" class="form-control" required placeholder="e.g. CS305">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Course Title</label>
+                        <input type="text" id="new-crs-title" class="form-control" required
+                            placeholder="e.g. Software Engineering Principles">
+                    </div>
+                    <div class="form-row" style="margin-bottom: 12px;">
+                        <div class="form-group col-6">
+                            <label>Credit Hours</label>
+                            <input type="number" id="new-crs-credits" class="form-control" required min="1" max="6"
+                                value="3">
+                        </div>
+                        <div class="form-group col-6">
+                            <label>Academic Level</label>
+                            <select id="new-crs-level" class="form-control">
+                                <option value="100">Level 100</option>
+                                <option value="200">Level 200</option>
+                                <option value="300">Level 300</option>
+                                <option value="400">Level 400</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Department</label>
+                        <select id="new-crs-dept" class="form-control">
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Business Administration">Business Administration</option>
+                            <option value="Electrical Engineering">Electrical Engineering</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Programme Scope</label>
+                        <select id="new-crs-programme" class="form-control">
+                            <option value="BSc Computer Science">BSc Computer Science</option>
+                            <option value="BSc Information Technology">BSc Information Technology</option>
+                            <option value="BSc Business Administration">BSc Business Administration</option>
+                            <option value="BSc. Data Science and Analytics">BSc. Data Science and Analytics
+                            </option>
+                            <option value="BSc. Mobile Computing">BSc. Mobile Computing</option>
+                            <option value="BSc. Information Systems">BSc. Information Systems</option>
+                            <option value="BSc. Networking and Systems Administration">BSc. Networking and
+                                Systems Administration</option>
+                            <option value="BSc. Internet of Things and Big Data">BSc. Internet of Things and Big
+                                Data</option>
+                            <option value="BSc. Web Application Development">BSc. Web Application Development
+                            </option>
+                            <option value="BSc. Telecommunication Engineering">BSc. Telecommunication
+                                Engineering</option>
+                            <option value="BSc. Computer Engineering">BSc. Computer Engineering</option>
+                            <option value="BSc. Electrical and Electronics Engineering">BSc. Electrical and
+                                Electronics Engineering</option>
+                            <option value="BSc. Mathematics">BSc. Mathematics</option>
+                            <option value="BSc. Actuarial Science with Data Analytics">BSc. Actuarial Science
+                                with Data Analytics</option>
+                            <option value="BSc. Computational Statistics">BSc. Computational Statistics</option>
+                            <option value="BSc. Accounting with Computing">BSc. Accounting with Computing
+                            </option>
+                            <option value="BSc. Economics">BSc. Economics</option>
+                            <option value="BSc. Procurement and Logistics">BSc. Procurement and Logistics
+                            </option>
+                            <option value="BSc. E-Commerce and Marketing Management">BSc. E-Commerce and
+                                Marketing Management</option>
+                            <option value="BSc. Financial Technology">BSc. Financial Technology</option>
+                            <option value="Diploma in Information Technology">Diploma in Information Technology
+                            </option>
+                            <option value="Diploma in Cyber Security">Diploma in Cyber Security</option>
+                            <option value="Diploma in Computer Science">Diploma in Computer Science</option>
+                            <option value="Diploma in Web Application Development and Multimedia Technology">
+                                Diploma in Web Application Development and Multimedia Technology</option>
+                            <option value="Diploma in Data Science and Analytics">Diploma in Data Science and
+                                Analytics</option>
+                            <option value="Diploma in Telecommunications Engineering">Diploma in
+                                Telecommunications Engineering</option>
+                            <option value="Diploma in Public Relations and Administration">Diploma in Public
+                                Relations and Administration</option>
+                            <option value="All Programmes">All Department Programmes</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Session Scope</label>
+                        <select id="new-crs-session" class="form-control">
+                            <option value="Morning">Morning Session</option>
+                            <option value="Afternoon">Afternoon Session</option>
+                            <option value="Evening">Evening Session</option>
+                            <option value="Weekend">Weekend Session</option>
+                            <option value="All Sessions">All Sessions</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label>Assign Course Instructor (Optional)</label>
+                        <select id="new-crs-teacher" class="form-control">
+                            <option value="">Unassigned (Select Later)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg"><i
+                            class="fa-solid fa-plus-circle"></i> Save & Publish</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="academic-calendar-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-calendar-plus" style="color: var(--brand-primary);"></i> Add / Edit Academic
+                    Activity Schedule</h3>
+                <button class="modal-close" onclick="app.closeModal('academic-calendar-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminView.saveAcademicActivity(event)">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Activity / Event Title</label>
+                        <input type="text" id="acad-act-title" class="form-control" required
+                            placeholder="e.g. Mid-Semester Examinations Window">
+                    </div>
+                    <div class="form-row" style="margin-bottom: 12px;">
+                        <div class="form-group col-6">
+                            <label>Start Date</label>
+                            <input type="date" id="acad-act-sdate" class="form-control" required>
+                        </div>
+                        <div class="form-group col-6">
+                            <label>End Date</label>
+                            <input type="date" id="acad-act-edate" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Target Audience / Scope</label>
+                        <select id="acad-act-scope" class="form-control">
+                            <option value="All Students & Faculty">All Students & Faculty</option>
+                            <option value="Undergraduate Students">Undergraduate Students</option>
+                            <option value="Faculty Members Only">Faculty Members Only</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label>Description / Instructions</label>
+                        <textarea id="acad-act-desc" class="form-control" rows="3"
+                            placeholder="Enter activity details or deadline guidelines..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg"><i
+                            class="fa-solid fa-calendar-check"></i> Save & Publish</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="calendar-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-calendar-days" style="color: var(--brand-primary);"></i> Published Academic
+                    Calendar Schedule</h3>
+                <button class="modal-close" onclick="app.closeModal('calendar-modal')">&times;</button>
+            </div>
+            <div id="calendar-modal-body" class="modal-body">
+
+            </div>
+        </div>
+    </div>
+
+
+    <div id="generate-statement-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-file-invoice" style="color: var(--brand-primary);"></i> Generate Official
+                    Statements of Results</h3>
+                <button class="modal-close" onclick="app.closeModal('generate-statement-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminView.runGenerateStatementOfResults(event)">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Select Target Scope</label>
+                        <select id="stmt-scope" class="form-control" onchange="adminView.toggleStatementScopeInput()">
+                            <option value="single">Single Student (by Student ID)</option>
+                            <option value="level">All Students in Level</option>
+                            <option value="department">All Students in Department</option>
+                            <option value="programme">All Students in Programme</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="stmt-target-input-grp" style="margin-bottom: 16px;">
+                        <label id="stmt-target-label">Student Index / ID</label>
+                        <input type="text" id="stmt-target-val" class="form-control" required
+                            placeholder="e.g. 4211260001">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg"><i class="fa-solid fa-print"></i>
+                        Generate & Download Official Statement (PDF)</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="add-fee-category-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-tags" style="color: var(--brand-primary);"></i> Add New Fee Category /
+                    Structure</h3>
+                <button class="modal-close" onclick="app.closeModal('add-fee-category-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminView.saveFeeCategory(event)">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Fee Category Name</label>
+                        <input type="text" id="fee-cat-name" class="form-control" required
+                            placeholder="e.g. Level 300 Tuition & Lab Fee">
+                    </div>
+                    <div class="form-row" style="margin-bottom: 12px;">
+                        <div class="form-group col-6">
+                            <label>Category Code</label>
+                            <input type="text" id="fee-cat-code" class="form-control" required
+                                placeholder="e.g. FEE-300-LAB">
+                        </div>
+                        <div class="form-group col-6">
+                            <label>Amount (GH₵)</label>
+                            <input type="number" step="0.01" id="fee-cat-amt" class="form-control" required
+                                placeholder="e.g. 3500.00">
+                        </div>
+                    </div>
+                    <div class="form-row" style="margin-bottom: 16px;">
+                        <div class="form-group col-6">
+                            <label>Target Level</label>
+                            <select id="fee-cat-level" class="form-control">
+                                <option value="All Levels">All Levels</option>
+                                <option value="Level 100">Level 100</option>
+                                <option value="Level 200">Level 200</option>
+                                <option value="Level 300">Level 300</option>
+                                <option value="Level 400">Level 400</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-6">
+                            <label>Target Session</label>
+                            <select id="fee-cat-session" class="form-control">
+                                <option value="All Sessions">All Sessions</option>
+                                <option value="Morning">Morning</option>
+                                <option value="Afternoon">Afternoon</option>
+                                <option value="Evening">Evening</option>
+                                <option value="Weekend">Weekend</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg"><i
+                            class="fa-solid fa-floppy-disk"></i> Save & Apply</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="report-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h3 id="report-modal-title"><i class="fa-solid fa-chart-column"
+                        style="color: var(--brand-primary);"></i> Analytical System Report</h3>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-sm btn-primary" onclick="window.print()"><i class="fa-solid fa-print"></i>
+                        Print Report</button>
+                    <button class="modal-close" onclick="app.closeModal('report-modal')">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body" id="report-modal-body" style="max-height: 75vh; overflow-y: auto;">
+
+            </div>
+        </div>
+    </div>
+
+
+    <div id="otp-verification-modal" class="modal-overlay hidden">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-shield-halved" style="color: var(--brand-primary);"></i> Email OTP
+                    Verification</h3>
+                <button class="modal-close" onclick="app.closeModal('otp-verification-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div
+                    style="background: rgba(37, 99, 235, 0.08); border-left: 4px solid var(--brand-primary); padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 16px;">
+                    <div
+                        style="color: var(--brand-primary); font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                        <span>Dispatched to: <strong id="otp-sent-target">user@example.com</strong></span>
+                    </div>
+                    <small style="color: var(--text-secondary); display: block; margin-top: 4px;">Please check your
+                        inbox and spam/junk folder for the 6-digit passcode.</small>
+                </div>
+                <form id="otp-verification-form" onsubmit="authView.verifyAndCompleteRegistration(event)">
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label for="otp-input-code" style="font-weight: 600;">Enter 6-Digit Email Passcode *</label>
+                        <input type="text" id="otp-input-code" class="form-control text-center" placeholder="123456"
+                            maxlength="6"
+                            style="font-size: 1.5rem; letter-spacing: 6px; font-weight: 700; height: 52px;" required
+                            autocomplete="one-time-code" autofocus>
+                    </div>
+                    <button type="submit" id="otp-verify-submit-btn" class="btn btn-primary btn-block btn-lg">
+                        <i class="fa-solid fa-user-check"></i> Verify OTP
+                    </button>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+                        <span id="otp-resend-status" style="font-size: 0.8rem; color: var(--text-secondary);">Didn't
+                            receive email?</span>
+                        <button type="button" id="otp-resend-btn" class="btn btn-xs btn-outline-secondary"
+                            onclick="authView.resendRegistrationOTP()">
+                            <i class="fa-solid fa-rotate-right"></i> Resend OTP Code
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="config.js"></script>
+    <script src="passwordHelper.js"></script>
+    <script src="store.js"></script>
+    <script src="validators.js"></script>
+    <script src="supabaseClient.js"></script>
+    <script src="pdfHelper.js"></script>
+    <script src="aiAssistant.js"></script>
+    <script src="views/authView.js"></script>
+    <script src="views/studentView.js"></script>
+    <script src="views/teacherView.js"></script>
+    <script src="views/parentView.js"></script>
+    <script src="views/adminView.js"></script>
+    <script src="views/libraryView.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
