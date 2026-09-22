@@ -41,9 +41,24 @@ const parentView = {
         }
 
         const attendanceLogs = (store.get("attendance") || []).filter(a => child && a.student_id === child.student_id);
+        const childAtt = child && store.calculateStudentAttendance ? store.calculateStudentAttendance(child.student_id) : null;
+        const activeSession = store.getCurrentAcademicSession ? store.getCurrentAcademicSession() : { academic_year: '2026/2027', current_semester: 'Semester 1', full_label: '2026/2027 - Semester 1' };
 
         return `
-            
+            <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(124, 58, 237, 0.08)); border: 1px solid var(--border-color); border-left: 4px solid var(--brand-primary); padding: 14px 20px; border-radius: var(--radius-md); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--brand-primary); color: white; font-size: 1rem;"><i class="fa-solid fa-users"></i></span>
+                    <div>
+                        <div style="font-size: 0.76rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.5px;">Current Academic Session</div>
+                        <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary);" class="active-academic-session-label">${activeSession.full_label}</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="badge badge-success" style="font-size: 0.8rem;"><i class="fa-solid fa-circle-dot"></i> Active Semester</span>
+                    <span style="font-size: 0.82rem; color: var(--text-secondary);">Academic Year: <strong id="parent-dashboard-acad-year">${activeSession.academic_year}</strong></span>
+                </div>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-info">
@@ -107,7 +122,10 @@ const parentView = {
                     <div class="card parent-dashboard-container" id="ward-attendance-container">
                         <div class="card-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                             <h3><i class="fa-solid fa-user-check" style="color: var(--status-success);"></i> Ward Attendance Overview</h3>
-                            <button class="btn btn-sm btn-outline-primary" onclick="app.navigateTo('attendance')">View Full Register</button>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                ${childAtt ? `<span class="badge ${childAtt.rate >= 75 ? 'badge-success' : 'badge-warning'}" style="font-size: 0.82rem;"><i class="fa-solid fa-chart-pie"></i> ${childAtt.rate}% Overall (${childAtt.attended}/${childAtt.total} sessions)</span>` : ''}
+                                <button class="btn btn-sm btn-outline-primary" onclick="app.navigateTo('attendance')">View Full Register</button>
+                            </div>
                         </div>
                         <div class="table-responsive">
                             <table class="table">
@@ -339,6 +357,20 @@ const parentView = {
         const attendance = store.get("attendance") || [];
         const wardAttendance = attendance.filter(a => linkedIds.includes(a.student_id));
 
+        const wardStatsHtml = linkedStudents.map(w => {
+            const wAtt = store.calculateStudentAttendance ? store.calculateStudentAttendance(w.student_id) : { rate: 100, attended: 0, total: 0 };
+            return `
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <span>${w.first_name} ${w.surname} (${w.student_id})</span>
+                        <h3 style="color: ${wAtt.rate >= 75 ? 'var(--status-success)' : 'var(--status-warning)'};">${wAtt.rate}% Attendance</h3>
+                        <small class="text-muted">${wAtt.attended} attended / ${wAtt.total} total sessions</small>
+                    </div>
+                    <div class="stat-icon ${wAtt.rate >= 75 ? 'success' : 'warning'}"><i class="fa-solid fa-clipboard-user"></i></div>
+                </div>
+            `;
+        }).join('');
+
         return `
             <div class="card parent-dashboard-container" id="ward-attendance-container">
                 <div class="card-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
@@ -347,6 +379,8 @@ const parentView = {
                         <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">Track lecture attendance records and physical presence for your linked children.</p>
                     </div>
                 </div>
+
+                ${wardStatsHtml ? `<div class="stats-grid" style="margin-bottom: 20px;">${wardStatsHtml}</div>` : ''}
 
                 <div class="table-responsive">
                     <table class="table">

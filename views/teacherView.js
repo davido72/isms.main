@@ -45,9 +45,23 @@ const teacherView = {
         const students = store.get("students") || [];
         const attendance = store.get("attendance") || [];
         const quizzes = store.get("quizzes") || [];
+        const activeSession = store.getCurrentAcademicSession ? store.getCurrentAcademicSession() : { academic_year: '2026/2027', current_semester: 'Semester 1', full_label: '2026/2027 - Semester 1' };
 
         return `
-            
+            <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(124, 58, 237, 0.08)); border: 1px solid var(--border-color); border-left: 4px solid var(--brand-primary); padding: 14px 20px; border-radius: var(--radius-md); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--brand-primary); color: white; font-size: 1rem;"><i class="fa-solid fa-chalkboard-user"></i></span>
+                    <div>
+                        <div style="font-size: 0.76rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.5px;">Current Academic Session</div>
+                        <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary);" class="active-academic-session-label">${activeSession.full_label}</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="badge badge-success" style="font-size: 0.8rem;"><i class="fa-solid fa-circle-dot"></i> Active Teaching Term</span>
+                    <span style="font-size: 0.82rem; color: var(--text-secondary);">Academic Year: <strong id="teacher-dashboard-acad-year">${activeSession.academic_year}</strong></span>
+                </div>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-info">
@@ -284,18 +298,27 @@ const teacherView = {
                                         <th>Credits</th>
                                         <th>Level</th>
                                         <th>Session</th>
+                                        <th>Attendance Rate</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${courses.map(c => `
+                                    ${courses.map(c => {
+            const crsAtt = store.calculateCourseAttendance ? store.calculateCourseAttendance(c.course_code) : { rate: 100, total: 0 };
+            return `
                                         <tr>
                                             <td><strong>${c.course_code}</strong></td>
                                             <td>${c.title}</td>
                                             <td>${c.credit_hours || 3} Hrs</td>
                                             <td>Level ${c.level || 300}</td>
                                             <td><span class="badge badge-primary">${c.session || 'Morning'}</span></td>
+                                            <td>
+                                                <span class="badge ${crsAtt.rate >= 75 ? 'badge-success' : 'badge-warning'}">
+                                                    <i class="fa-solid fa-clipboard-user"></i> ${crsAtt.rate}% (${crsAtt.total} logs)
+                                                </span>
+                                            </td>
                                         </tr>
-                                    `).join('') || '<tr><td colspan="5" class="text-muted">No courses assigned to your roster yet.</td></tr>'}
+                                    `;
+        }).join('') || '<tr><td colspan="6" class="text-muted">No courses assigned to your roster yet.</td></tr>'}
                                 </tbody>
                             </table>
                         </div>

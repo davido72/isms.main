@@ -12,12 +12,25 @@ const studentView = {
         const gpa = grades.length > 0 ? (totalPoints / (grades.length * 3)).toFixed(2) : "4.00";
 
 
-        const totalClasses = attendance.length;
-        const presentClasses = attendance.filter(a => a.status === "Present" || a.status === "Late").length;
-        const attRate = totalClasses > 0 ? Math.round((presentClasses / totalClasses) * 100) : 100;
+        const studentAtt = store.calculateStudentAttendance ? store.calculateStudentAttendance(studentId) : { rate: 100, attended: 0, total: 0 };
+        const attRate = studentAtt.rate;
+        const activeSession = store.getCurrentAcademicSession ? store.getCurrentAcademicSession() : { academic_year: '2026/2027', current_semester: 'Semester 1', full_label: '2026/2027 - Semester 1' };
 
         return `
-            
+            <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(124, 58, 237, 0.08)); border: 1px solid var(--border-color); border-left: 4px solid var(--brand-primary); padding: 14px 20px; border-radius: var(--radius-md); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--brand-primary); color: white; font-size: 1rem;"><i class="fa-solid fa-calendar-check"></i></span>
+                    <div>
+                        <div style="font-size: 0.76rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.5px;">Current Academic Session</div>
+                        <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary);" class="active-academic-session-label">${activeSession.full_label}</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="badge badge-success" style="font-size: 0.8rem;"><i class="fa-solid fa-circle-dot"></i> Active Semester</span>
+                    <span style="font-size: 0.82rem; color: var(--text-secondary);">Academic Year: <strong id="student-dashboard-acad-year">${activeSession.academic_year}</strong></span>
+                </div>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-info">
@@ -776,11 +789,60 @@ const studentView = {
         const enrollments = (store.get("enrollments") || []).filter(e => e.student_id === student.student_id);
         const currentSemester = "Semester 1";
         const semesterEnrollments = enrollments.filter(e => !e.semester || e.semester.toLowerCase().includes(currentSemester.toLowerCase()));
+        const overallAtt = store.calculateStudentAttendance ? store.calculateStudentAttendance(student.student_id) : { rate: 100, attended: 0, total: 0 };
+        const courseBreakdownHtml = semesterEnrollments.map(e => {
+            const cAtt = store.calculateStudentAttendance ? store.calculateStudentAttendance(student.student_id, e.course_code) : { rate: 100, attended: 0, total: 0 };
+            const isEligible = cAtt.rate >= 75;
+            return `
+                <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <div style="font-weight: 700; color: var(--text-primary); font-size: 0.95rem;">${e.course_code} - ${e.course_title || e.course_code}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">
+                            <span>${cAtt.attended} attended / ${cAtt.total} sessions held</span> &bull; 
+                            <span style="color: ${isEligible ? 'var(--status-success)' : 'var(--status-danger)'}; font-weight: 600;">
+                                ${isEligible ? '<i class="fa-solid fa-check"></i> Eligible for Exams' : '<i class="fa-solid fa-triangle-exclamation"></i> Low Attendance Warning (&lt;75%)'}
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="badge ${isEligible ? 'badge-success' : 'badge-warning'}" style="font-size: 0.9rem; padding: 6px 12px;">
+                            ${cAtt.rate}% Attendance
+                        </span>
+                    </div>
+                </div>
+            `;
+        }).join('') || '<p class="text-muted" style="font-size: 0.88rem;">No registered courses found for attendance tracking.</p>';
 
         return `
             <div class="card">
                 <div class="card-header">
                     <h3><i class="fa-solid fa-clipboard-user" style="color: var(--brand-primary);"></i> Attendance Register Portal</h3>
+                </div>
+
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <span>Your Overall Attendance %</span>
+                            <h3 style="color: ${(overallAtt.rate >= 75) ? 'var(--status-success)' : 'var(--status-warning)'};">${overallAtt.rate}% Present</h3>
+                            <small class="text-muted">${overallAtt.attended} attended / ${overallAtt.total} total sessions</small>
+                        </div>
+                        <div class="stat-icon ${(overallAtt.rate >= 75) ? 'success' : 'warning'}"><i class="fa-solid fa-clipboard-user"></i></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <span>Examination Eligibility</span>
+                            <h3 style="color: ${(overallAtt.rate >= 75) ? 'var(--status-success)' : 'var(--status-danger)'};">${overallAtt.rate >= 75 ? 'ELIGIBLE' : 'AT RISK'}</h3>
+                            <small class="text-muted">${overallAtt.rate >= 75 ? 'Minimum 75% threshold achieved' : 'Attendance below 75% threshold'}</small>
+                        </div>
+                        <div class="stat-icon ${(overallAtt.rate >= 75) ? 'success' : 'danger'}"><i class="fa-solid ${(overallAtt.rate >= 75) ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i></div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 24px;">
+                    <h4 style="font-size: 0.95rem; margin-bottom: 12px; color: var(--text-primary);"><i class="fa-solid fa-chart-pie" style="color: var(--brand-primary);"></i> Registered Courses Real-Time Attendance Breakdown</h4>
+                    <div style="display: grid; gap: 10px;">
+                        ${courseBreakdownHtml}
+                    </div>
                 </div>
 
                 

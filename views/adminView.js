@@ -119,10 +119,8 @@ const adminView = {
         set('kpi-departments', deptCount + ' Departments');
 
 
-        const semester = regControl.current_semester ||
-            sysSettings.general?.current_semester ||
-            '2026/27 Sem 1';
-        set('kpi-semester', semester);
+        const activeSession = store.getCurrentAcademicSession ? store.getCurrentAcademicSession() : { full_label: '2026/2027 - Semester 1' };
+        set('kpi-semester', activeSession.full_label);
 
 
         const pendingGradeChanges = gradeLogs.filter(g => g.status === 'Pending' || !g.status).length;
@@ -159,6 +157,47 @@ const adminView = {
 
 
         this._refreshAdminChart();
+    },
+
+    _updateAttendanceStats() {
+        // Only run when the attendance tab is active
+        if (this.currentTab !== 'attendance') return;
+
+        const dept = (document.getElementById('adm-att-dept-filter') || {}).value || 'ALL';
+        const course = (document.getElementById('adm-att-course-filter') || {}).value || 'ALL';
+        const level = (document.getElementById('adm-att-level-filter') || {}).value || 'ALL';
+        const search = (document.getElementById('adm-att-search') || {}).value || '';
+
+        const stats = store.calculateOverallAttendance({ dept, course, level, search });
+
+        const selectedCourseAtt = course !== 'ALL' && store.calculateCourseAttendance
+            ? store.calculateCourseAttendance(course)
+            : null;
+
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+        setEl('adm-att-stat-overall', `${stats.rate}% Present`);
+
+        if (selectedCourseAtt) {
+            setEl('adm-att-stat-course-label', `${course} Attendance %`);
+            setEl('adm-att-stat-course', `${selectedCourseAtt.rate}% Present`);
+        } else {
+            setEl('adm-att-stat-course-label', dept !== 'ALL' ? `${dept} %` : `Computer Science %`);
+            setEl('adm-att-stat-course', `${stats.csRate}% Present`);
+        }
+
+        setEl('adm-att-stat-absent', `${stats.absentToday} Students`);
+        setEl('adm-att-stat-late', `${stats.lateToday} Students`);
+
+        // Colour the overall rate by threshold
+        const overallEl = document.getElementById('adm-att-stat-overall');
+        if (overallEl) {
+            overallEl.style.color = stats.rate >= 75
+                ? 'var(--status-success)'
+                : stats.rate >= 50
+                    ? 'var(--status-warning)'
+                    : 'var(--status-danger)';
+        }
     },
 
     _refreshAdminChart() {
@@ -214,11 +253,8 @@ const adminView = {
 
             const deptSet = new Set(courses.map(c => c.department).filter(Boolean));
             const deptCount = deptSet.size || 5;
-            const regControl2 = store.get('reg_control') || {};
-            const sysSettings2 = store.get('system_settings') || { general: {} };
-            const semesterLabel = regControl2.current_semester ||
-                sysSettings2.general?.current_semester ||
-                '2026/27 Sem 1';
+            const activeSession = store.getCurrentAcademicSession ? store.getCurrentAcademicSession() : { full_label: '2026/2027 - Semester 1' };
+            const semesterLabel = activeSession.full_label;
             const enrollments2 = store.get('enrollments') || [];
             const enrolledIds2 = new Set(enrollments2.map(e => e.student_id));
             const unregistered2 = students.filter(s => !enrolledIds2.has(s.student_id) && s.status !== 'Inactive').length;
@@ -354,7 +390,7 @@ const adminView = {
                         <h3><i class="fa-solid fa-chart-bar" style="color: var(--brand-primary);"></i> Departmental Enrollment Analytics</h3>
                         <span style="font-size: 0.78rem; color: var(--text-secondary); font-weight: 500;"><i class="fa-solid fa-rotate" style="color: var(--status-success);"></i> Live</span>
                     </div>
-                    <canvas id="admin-analytics-chart" style="max-height: 220px;"></canvas>
+                    <canvas id="admin-analytics-chart" style="width: 100%; min-height: 240px;"></canvas>
                 </div>
             `;
         }
@@ -388,6 +424,7 @@ const adminView = {
                                         <th>Email</th>
                                         <th>Programme</th>
                                         <th>Level</th>
+                                        <th>Attendance %</th>
                                         <th>Status</th>
                                         <th>Super Admin Operations</th>
                                     </tr>
@@ -400,6 +437,7 @@ const adminView = {
                                             <td>${s.email}</td>
                                             <td>${s.programme}</td>
                                             <td>Level ${s.level}</td>
+                                            <td><span class="badge ${(store.calculateStudentAttendance ? store.calculateStudentAttendance(s.student_id).rate : 100) >= 75 ? 'badge-success' : 'badge-warning'}"><i class="fa-solid fa-clipboard-user"></i> ${store.calculateStudentAttendance ? store.calculateStudentAttendance(s.student_id).rate : 100}%</span></td>
                                             <td><span class="badge ${s.status === 'Inactive' ? 'badge-danger' : 'badge-success'}">${s.status || 'Active'}</span></td>
                                             <td>
                                                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
@@ -639,6 +677,7 @@ const adminView = {
                                     <th>Department</th>
                                     <th>Level</th>
                                     <th>Assigned Instructor</th>
+                                    <th>Attendance %</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -655,6 +694,11 @@ const adminView = {
                                             <td>Level ${c.level}</td>
                                             <td>
                                                 ${teacher ? `<span class="badge badge-success"><i class="fa-solid fa-chalkboard-user"></i> ${teacher.full_name}</span>` : `<span class="badge badge-danger"><i class="fa-solid fa-user-xmark"></i> Unassigned</span>`}
+                                            </td>
+                                            <td>
+                                                <span class="badge ${(store.calculateCourseAttendance ? store.calculateCourseAttendance(c.course_code).rate : 100) >= 75 ? 'badge-success' : 'badge-warning'}">
+                                                    <i class="fa-solid fa-clipboard-user"></i> ${store.calculateCourseAttendance ? store.calculateCourseAttendance(c.course_code).rate : 100}%
+                                                </span>
                                             </td>
                                             <td>
                                                 <select class="form-control" style="padding: 4px 8px; font-size: 0.78rem; width: auto; display: inline-block;" onchange="adminView.assignTeacherToCourse('${c.id}', this.value)">
@@ -873,7 +917,7 @@ const adminView = {
                     <div style="background: rgba(37, 99, 235, 0.08); padding: 20px; border-radius: var(--radius-md); margin-bottom: 24px; border: 1px solid var(--brand-primary);">
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                             <div>
-                                <h4 style="margin-bottom: 4px;">Semester Registration Window: <strong>${regControl.current_semester || '2026/2027 - Semester 1'}</strong></h4>
+                                <h4 style="margin-bottom: 4px;">Semester Registration Window: <strong>${store.getCurrentAcademicSession ? store.getCurrentAcademicSession().full_label : (regControl.current_semester || '2026/2027 - Semester 1')}</strong></h4>
                                 <p style="font-size: 0.88rem; margin: 0 0 2px 0;">Opening Date: <strong>${regControl.opening_date}</strong> | Closing Date: <strong>${regControl.closing_date}</strong></p>
                                 <p style="font-size: 0.88rem; margin: 0;">Maximum Credit Hours Allowed per Student: <strong>${regControl.max_credit_hours} Hours</strong></p>
                             </div>
@@ -1091,6 +1135,19 @@ const adminView = {
 
 
         if (this.currentTab === 'attendance') {
+            const attStats = store.calculateOverallAttendance ? store.calculateOverallAttendance({
+                dept: this.attendanceDeptFilter,
+                course: this.attendanceCourseFilter,
+                level: this.attendanceLevelFilter,
+                search: this.attendanceSearchQuery
+            }) : { rate: 94.2, csRate: 96.0, absentToday: 12, lateToday: 8 };
+
+            const selectedCourseAtt = this.attendanceCourseFilter !== 'ALL' && store.calculateCourseAttendance
+                ? store.calculateCourseAttendance(this.attendanceCourseFilter)
+                : null;
+            const secondStatLabel = selectedCourseAtt ? `${this.attendanceCourseFilter} Attendance %` : (this.attendanceDeptFilter !== 'ALL' ? `${this.attendanceDeptFilter} %` : `Computer Science %`);
+            const secondStatVal = selectedCourseAtt ? `${selectedCourseAtt.rate}% Present` : `${attStats.csRate}% Present`;
+
             return `
                 <div class="card">
                     <div class="card-header" style="justify-content: space-between; flex-wrap: wrap; gap: 12px;">
@@ -1100,11 +1157,11 @@ const adminView = {
                         Filter, search, and perform real-time oversight of student attendance metrics across Departments, Programmes, Courses, and Class Levels.
                     </p>
 
-                    <div class="stats-grid" style="margin-bottom: 20px;">
-                        <div class="stat-card"><div class="stat-info"><span>Overall Attendance %</span><h3 style="color: var(--status-success);">94.2% Present</h3></div></div>
-                        <div class="stat-card"><div class="stat-info"><span>Computer Science %</span><h3>96.0% Present</h3></div></div>
-                        <div class="stat-card"><div class="stat-info"><span>Absent Students Today</span><h3 style="color: var(--status-danger);">12 Students</h3></div></div>
-                        <div class="stat-card"><div class="stat-info"><span>Late Students Today</span><h3 style="color: var(--status-warning);">8 Students</h3></div></div>
+                    <div class="stats-grid" id="adm-att-stats-grid" style="margin-bottom: 20px;">
+                        <div class="stat-card"><div class="stat-info"><span>Overall Attendance %</span><h3 id="adm-att-stat-overall" style="color: var(--status-success);">${attStats.rate}% Present</h3></div></div>
+                        <div class="stat-card"><div class="stat-info"><span id="adm-att-stat-course-label">${secondStatLabel}</span><h3 id="adm-att-stat-course">${secondStatVal}</h3></div></div>
+                        <div class="stat-card"><div class="stat-info"><span>Absent Students Today</span><h3 id="adm-att-stat-absent" style="color: var(--status-danger);">${attStats.absentToday} Students</h3></div></div>
+                        <div class="stat-card"><div class="stat-info"><span>Late Students Today</span><h3 id="adm-att-stat-late" style="color: var(--status-warning);">${attStats.lateToday} Students</h3></div></div>
                     </div>
 
                     
@@ -2223,27 +2280,7 @@ const adminView = {
         this.switchSection('results');
     },
 
-    saveSystemSettings(event) {
-        event.preventDefault();
-        const sys = store.get("system_settings") || {};
-        sys.general.university_name = document.getElementById("sys-univ-name").value.trim();
-        sys.general.academic_year = document.getElementById("sys-acad-year").value.trim();
-        sys.general.current_semester = document.getElementById("sys-curr-sem").value.trim();
-        sys.academic.max_credit_limit = parseInt(document.getElementById("sys-max-credits").value, 10);
-
-        store.set("system_settings", sys);
-        store.logAudit(`System settings updated: Academic Year ${sys.general.academic_year}, Semester: ${sys.general.current_semester}`, "System Configuration");
-
-
-        if (window.app && typeof window.app.refreshActiveViews === "function") {
-            window.app.refreshActiveViews();
-        }
-
-        const semEl = document.getElementById("live-current-semester");
-        if (semEl) semEl.textContent = `${sys.general.academic_year} - ${sys.general.current_semester}`;
-
-        app.showToast(`System settings saved. Semester updated to: ${sys.general.current_semester}.`, "success");
-    },
+    // saveSystemSettings is implemented comprehensively below with full general, academic, security, and geofence settings
 
     openAdminEditModal(userType, userId) {
         document.getElementById("adm-user-type").value = userType;
@@ -3773,6 +3810,40 @@ const adminView = {
         if (lvl) this.attendanceLevelFilter = lvl.value;
         if (srch) this.attendanceSearchQuery = srch.value.trim();
 
+        this._updateAttendanceStats();
+    },
+
+    _updateAttendanceStats() {
+        if (typeof store === "undefined" || !store.calculateOverallAttendance) return;
+
+        const attStats = store.calculateOverallAttendance({
+            dept: this.attendanceDeptFilter,
+            course: this.attendanceCourseFilter,
+            level: this.attendanceLevelFilter,
+            search: this.attendanceSearchQuery
+        });
+
+        const overallEl = document.getElementById("adm-att-stat-overall");
+        if (overallEl) overallEl.textContent = `${attStats.rate}% Present`;
+
+        const selectedCourseAtt = this.attendanceCourseFilter !== 'ALL' && store.calculateCourseAttendance
+            ? store.calculateCourseAttendance(this.attendanceCourseFilter)
+            : null;
+        const secondStatLabel = selectedCourseAtt ? `${this.attendanceCourseFilter} Attendance %` : (this.attendanceDeptFilter !== 'ALL' ? `${this.attendanceDeptFilter} %` : `Computer Science %`);
+        const secondStatVal = selectedCourseAtt ? `${selectedCourseAtt.rate}% Present` : `${attStats.csRate}% Present`;
+
+        const courseLabelEl = document.getElementById("adm-att-stat-course-label");
+        if (courseLabelEl) courseLabelEl.textContent = secondStatLabel;
+
+        const courseEl = document.getElementById("adm-att-stat-course");
+        if (courseEl) courseEl.textContent = secondStatVal;
+
+        const absentEl = document.getElementById("adm-att-stat-absent");
+        if (absentEl) absentEl.textContent = `${attStats.absentToday} Students`;
+
+        const lateEl = document.getElementById("adm-att-stat-late");
+        if (lateEl) lateEl.textContent = `${attStats.lateToday} Students`;
+
         this.renderFilteredAttendanceTable();
         this.initAttendanceOversightChart();
     },
@@ -4033,10 +4104,13 @@ const adminView = {
     saveSystemSettings(event) {
         event.preventDefault();
         const settings = store.get("system_settings") || {};
+        const acadYear = document.getElementById("sys-acad-year") ? document.getElementById("sys-acad-year").value.trim() : "2026/2027";
+        const currSem = document.getElementById("sys-curr-sem") ? document.getElementById("sys-curr-sem").value.trim() : "Semester 1";
+
         settings.general = {
             university_name: document.getElementById("sys-univ-name") ? document.getElementById("sys-univ-name").value.trim() : "Ghana Communication Technology University (GCTU)",
-            academic_year: document.getElementById("sys-acad-year") ? document.getElementById("sys-acad-year").value.trim() : "2026/2027",
-            current_semester: document.getElementById("sys-curr-sem") ? document.getElementById("sys-curr-sem").value.trim() : "Semester 1"
+            academic_year: acadYear,
+            current_semester: currSem
         };
         settings.academic = {
             max_credit_limit: parseInt(document.getElementById("sys-max-credits") ? document.getElementById("sys-max-credits").value : 24, 10),
@@ -4055,23 +4129,34 @@ const adminView = {
             radius: parseInt(document.getElementById("sys-geo-radius") ? document.getElementById("sys-geo-radius").value : 500, 10)
         };
         store.set("system_settings", settings);
-        if (settings.general && settings.general.current_semester) {
-            store.set("current_semester", settings.general.current_semester);
+
+        const fullLabel = currSem.includes(acadYear) ? currSem : `${acadYear} - ${currSem}`;
+        store.set("current_semester", fullLabel);
+
+        const regControl = store.get("reg_control") || {};
+        regControl.current_semester = fullLabel;
+        store.set("reg_control", regControl);
+
+        // Immediately update Current Semester container in Admin Overview & Summary
+        const kpiSemEl = document.getElementById("kpi-semester");
+        if (kpiSemEl) {
+            kpiSemEl.textContent = fullLabel;
+        }
+        const liveSemEl = document.getElementById("live-current-semester");
+        if (liveSemEl) {
+            liveSemEl.textContent = fullLabel;
         }
 
+        // Broadcast update to all user dashboards
         if (window.app && typeof window.app.refreshActiveViews === "function") {
             window.app.refreshActiveViews();
         }
 
-        const semEl = document.getElementById("live-current-semester");
-        if (semEl && settings.general) {
-            semEl.textContent = `${settings.general.academic_year || ''} - ${settings.general.current_semester || ''}`;
-        }
         if (typeof app.renderAcademicCalendarModal === 'function') {
             app.renderAcademicCalendarModal();
         }
-        store.logAudit(`Institution settings updated: Academic Year ${settings.general?.academic_year}, Semester: ${settings.general?.current_semester}`, "Settings");
-        app.showToast(`System settings saved. Semester: ${settings.general?.current_semester || 'Updated'}.`, "success");
+        store.logAudit(`Institution settings updated: Academic Year ${acadYear}, Semester: ${currSem}`, "Settings");
+        app.showToast(`System settings saved. Academic Session updated to: ${fullLabel}.`, "success");
     },
 
     deleteSingleFeeCategory(catId) {

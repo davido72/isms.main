@@ -416,6 +416,12 @@ class Store {
                 setTimeout(() => window.adminView._updateFinanceStats(), 50);
             }
         }
+
+        if (key === "attendance") {
+            if (window.adminView && typeof window.adminView._updateAttendanceStats === "function") {
+                setTimeout(() => window.adminView._updateAttendanceStats(), 50);
+            }
+        }
     }
 
     getCurrentUser() {
@@ -541,6 +547,150 @@ class Store {
             balance_due: balanceDue,
             status: status,
             payment_history: existingRecord?.payment_history || []
+        };
+    }
+
+    calculateStudentAttendance(studentId, courseCode = null) {
+        const attendance = this.get("attendance") || [];
+        const studentLogs = attendance.filter(a => {
+            if (a.student_id !== studentId) return false;
+            if (courseCode && courseCode !== 'ALL' && a.course_code !== courseCode) return false;
+            return true;
+        });
+
+        const total = studentLogs.length;
+        const present = studentLogs.filter(a => a.status === "Present").length;
+        const late = studentLogs.filter(a => a.status === "Late").length;
+        const absent = studentLogs.filter(a => a.status === "Absent").length;
+        const attended = present + late;
+        const rate = total > 0 ? Math.round((attended / total) * 100) : 100;
+
+        return {
+            student_id: studentId,
+            course_code: courseCode,
+            total,
+            present,
+            late,
+            absent,
+            attended,
+            rate
+        };
+    }
+
+    calculateCourseAttendance(courseCode) {
+        const attendance = this.get("attendance") || [];
+        const courseLogs = attendance.filter(a => a.course_code === courseCode);
+        const total = courseLogs.length;
+        const present = courseLogs.filter(a => a.status === "Present").length;
+        const late = courseLogs.filter(a => a.status === "Late").length;
+        const absent = courseLogs.filter(a => a.status === "Absent").length;
+        const attended = present + late;
+        const rate = total > 0 ? Math.round((attended / total) * 100) : 100;
+
+        return {
+            course_code: courseCode,
+            total,
+            present,
+            late,
+            absent,
+            attended,
+            rate
+        };
+    }
+
+    calculateOverallAttendance(filters = {}) {
+        const attendance = this.get("attendance") || [];
+        const students = this.get("students") || [];
+
+        const dept = filters.dept || 'ALL';
+        const crs = filters.course || 'ALL';
+        const lvl = filters.level || 'ALL';
+        const query = (filters.search || '').toLowerCase().trim();
+
+        const filtered = attendance.filter(a => {
+            const student = students.find(s => s.student_id === a.student_id);
+            const aDept = a.department || (student ? student.department : 'Computer Science');
+            const aLvl = student ? String(student.level) : '100';
+
+            if (dept !== 'ALL' && aDept !== dept) return false;
+            if (crs !== 'ALL' && a.course_code !== crs) return false;
+            if (lvl !== 'ALL' && aLvl !== lvl) return false;
+            if (query) {
+                const matchName = (a.student_name || '').toLowerCase().includes(query);
+                const matchId = (a.student_id || '').toLowerCase().includes(query);
+                const matchCrs = (a.course_code || '').toLowerCase().includes(query);
+                if (!matchName && !matchId && !matchCrs) return false;
+            }
+            return true;
+        });
+
+        const total = filtered.length;
+        const present = filtered.filter(a => a.status === "Present").length;
+        const late = filtered.filter(a => a.status === "Late").length;
+        const absent = filtered.filter(a => a.status === "Absent").length;
+        const attended = present + late;
+        const rate = total > 0 ? ((attended / total) * 100).toFixed(1) : "100.0";
+
+        // CS department average
+        const csLogs = attendance.filter(a => {
+            const student = students.find(s => s.student_id === a.student_id);
+            const aDept = a.department || (student ? student.department : 'Computer Science');
+            return aDept === 'Computer Science';
+        });
+        const csTotal = csLogs.length;
+        const csAttended = csLogs.filter(a => a.status === 'Present' || a.status === 'Late').length;
+        const csRate = csTotal > 0 ? ((csAttended / csTotal) * 100).toFixed(1) : "100.0";
+
+        // Today's stats
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todayLogs = attendance.filter(a => a.date === todayStr);
+        const absentToday = todayLogs.filter(a => a.status === "Absent").length || absent;
+        const lateToday = todayLogs.filter(a => a.status === "Late").length || late;
+
+        return {
+            total,
+            present,
+            late,
+            absent,
+            attended,
+            rate: Number(rate),
+            csRate: Number(csRate),
+            absentToday,
+            lateToday,
+            filteredCount: filtered.length
+        };
+    }
+
+    getCurrentAcademicSession() {
+        const sys = this.get("system_settings") || {};
+        const general = sys.general || {};
+        const regControl = this.get("reg_control") || {};
+        const standaloneSem = this.get("current_semester");
+
+        let acadYear = (general.academic_year || "").trim();
+        let currSem = (general.current_semester || "").trim();
+
+        if (!acadYear || !currSem) {
+            const raw = regControl.current_semester || standaloneSem || "2026/2027 - Semester 1";
+            if (raw.includes("-")) {
+                const parts = raw.split("-");
+                if (!acadYear) acadYear = parts[0].trim();
+                if (!currSem) currSem = parts.slice(1).join("-").trim();
+            } else {
+                if (!acadYear) acadYear = "2026/2027";
+                if (!currSem) currSem = raw;
+            }
+        }
+
+        if (!acadYear) acadYear = "2026/2027";
+        if (!currSem) currSem = "Semester 1";
+
+        let fullLabel = currSem.includes(acadYear) ? currSem : `${acadYear} - ${currSem}`;
+
+        return {
+            academic_year: acadYear,
+            current_semester: currSem,
+            full_label: fullLabel
         };
     }
 }

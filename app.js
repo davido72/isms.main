@@ -158,7 +158,8 @@ class App {
         }
 
         const events = store.get("academic_events") || store.get("academic_calendar") || [];
-        const activeSemester = store.get("system_settings")?.general?.current_semester || store.get("reg_control")?.current_semester || store.get("current_semester") || "Semester 1 (2026/2027)";
+        const activeSession = store.getCurrentAcademicSession ? store.getCurrentAcademicSession() : { full_label: "2026/2027 - Semester 1" };
+        const activeSemester = activeSession.full_label;
 
         let filteredEvents = events;
         if (this.calendarFilterScope !== 'ALL') {
@@ -372,6 +373,11 @@ class App {
         this.renderNavMenu(effectiveRole);
         this.updateNotificationBadge();
 
+        const activeSession = store.getCurrentAcademicSession ? store.getCurrentAcademicSession() : { full_label: "2026/2027 - Semester 1" };
+        document.querySelectorAll(".active-academic-session-label").forEach(el => {
+            el.textContent = activeSession.full_label;
+        });
+
 
         if (this._alertInterval) clearInterval(this._alertInterval);
         this._alertInterval = setInterval(() => {
@@ -383,7 +389,7 @@ class App {
                 if (e.key && (e.key.includes("system_alerts") || e.key.includes("audit_logs") || e.key.includes("reg_control") || e.key.includes("announcements"))) {
                     this.updateNotificationBadge();
                 }
-                if (e.key && (e.key.includes("courses") || e.key.includes("reg_control") || e.key.includes("enrollments") || e.key.includes("grades") || e.key.includes("attendance") || e.key.includes("fees") || e.key.includes("parents") || e.key.includes("students") || e.key.includes("announcements") || e.key.includes("quizzes"))) {
+                if (e.key && (e.key.includes("courses") || e.key.includes("reg_control") || e.key.includes("system_settings") || e.key.includes("current_semester") || e.key.includes("enrollments") || e.key.includes("grades") || e.key.includes("attendance") || e.key.includes("fees") || e.key.includes("parents") || e.key.includes("students") || e.key.includes("announcements") || e.key.includes("quizzes"))) {
                     this.refreshActiveViews();
                 }
             });
@@ -465,56 +471,77 @@ class App {
         if (!user) return;
 
         const effectiveRole = (user.role === "admin" && this.adminActiveViewRole) ? this.adminActiveViewRole : user.role;
-        const container = document.getElementById("view-content");
+        const container = document.getElementById("view-container") || document.getElementById("view-content");
         if (!container && effectiveRole !== "admin") return;
+
+        const currentView = this.currentView || "dashboard";
+
+        // Real-time update of any live session labels in the DOM
+        const activeSession = store.getCurrentAcademicSession ? store.getCurrentAcademicSession() : { full_label: "2026/2027 - Semester 1", academic_year: "2026/2027" };
+        document.querySelectorAll(".active-academic-session-label").forEach(el => {
+            el.textContent = activeSession.full_label;
+        });
+        // Update academic year labels across all user dashboards
+        ["student-dashboard-acad-year", "teacher-dashboard-acad-year", "parent-dashboard-acad-year"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = activeSession.academic_year;
+        });
+        const kpiSem = document.getElementById("kpi-semester");
+        if (kpiSem) {
+            kpiSem.textContent = activeSession.full_label;
+        }
+        const liveSem = document.getElementById("live-current-semester");
+        if (liveSem) {
+            liveSem.textContent = activeSession.full_label;
+        }
 
         if (effectiveRole === "student") {
             const studentData = user.student_data || (store.get("students") || []).find(s => s.student_id === user.student_id) || user;
-            if (this.currentView === "course-registration" && window.studentView && typeof studentView.renderCourseRegistration === "function") {
+            if (currentView === "course-registration" && window.studentView && typeof studentView.renderCourseRegistration === "function") {
                 container.innerHTML = studentView.renderCourseRegistration(studentData);
-            } else if (this.currentView === "dashboard" && window.studentView && typeof studentView.renderDashboard === "function") {
+            } else if (currentView === "dashboard" && window.studentView && typeof studentView.renderDashboard === "function") {
                 container.innerHTML = studentView.renderDashboard(studentData);
                 if (typeof studentView.initDashboardChart === "function") {
                     studentView.initDashboardChart(studentData);
                 }
-            } else if (this.currentView === "results" && window.studentView && typeof studentView.renderResults === "function") {
+            } else if (currentView === "results" && window.studentView && typeof studentView.renderResults === "function") {
                 container.innerHTML = studentView.renderResults(studentData);
-            } else if (this.currentView === "attendance" && window.studentView && typeof studentView.renderAttendance === "function") {
+            } else if (currentView === "attendance" && window.studentView && typeof studentView.renderAttendance === "function") {
                 container.innerHTML = studentView.renderAttendance(studentData);
-            } else if (this.currentView === "fees" && window.studentView && typeof studentView.renderFees === "function") {
+            } else if (currentView === "fees" && window.studentView && typeof studentView.renderFees === "function") {
                 container.innerHTML = studentView.renderFees(studentData);
             }
         } else if (effectiveRole === "parent") {
             const allParents = store.get("parents") || [];
             const parentData = user.parent_data || allParents.find(p => p.email === user.email || p.id === user.id) || allParents[0];
 
-            if (this.currentView === "dashboard" && window.parentView && typeof parentView.renderDashboard === "function") {
+            if (currentView === "dashboard" && window.parentView && typeof parentView.renderDashboard === "function") {
                 container.innerHTML = parentView.renderDashboard(user);
-            } else if ((this.currentView === "academics" || this.currentView === "child-results") && window.parentView && typeof parentView.renderChildResults === "function") {
+            } else if ((currentView === "academics" || currentView === "child-results") && window.parentView && typeof parentView.renderChildResults === "function") {
                 container.innerHTML = parentView.renderChildResults();
-            } else if ((this.currentView === "attendance" || this.currentView === "child-attendance") && window.parentView && typeof parentView.renderChildAttendance === "function") {
+            } else if ((currentView === "attendance" || currentView === "child-attendance") && window.parentView && typeof parentView.renderChildAttendance === "function") {
                 container.innerHTML = parentView.renderChildAttendance();
-            } else if ((this.currentView === "fees" || this.currentView === "child-fees") && window.parentView && typeof parentView.renderChildFees === "function") {
+            } else if ((currentView === "fees" || currentView === "child-fees") && window.parentView && typeof parentView.renderChildFees === "function") {
                 container.innerHTML = parentView.renderChildFees();
             }
         } else if (effectiveRole === "teacher") {
             const allTeachers = store.get("teachers") || [];
             const teacherData = user.teacher_data || allTeachers.find(t => t.email === user.email || t.staff_id === user.staff_id || t.id === user.id) || allTeachers[0];
 
-            if (this.currentView === "dashboard" && window.teacherView && typeof teacherView.renderDashboard === "function") {
+            if (currentView === "dashboard" && window.teacherView && typeof teacherView.renderDashboard === "function") {
                 container.innerHTML = teacherView.renderDashboard(teacherData);
                 if (typeof teacherView.initTeacherChart === "function") {
                     teacherView.initTeacherChart();
                 }
-            } else if (this.currentView === "course-entry" && window.teacherView && typeof teacherView.renderCourseEntry === "function") {
+            } else if (currentView === "course-entry" && window.teacherView && typeof teacherView.renderCourseEntry === "function") {
                 container.innerHTML = teacherView.renderCourseEntry();
-            } else if (this.currentView === "attendance" && window.teacherView && typeof teacherView.renderAttendanceManagement === "function") {
+            } else if (currentView === "attendance" && window.teacherView && typeof teacherView.renderAttendanceManagement === "function") {
                 container.innerHTML = teacherView.renderAttendanceManagement();
-            } else if ((this.currentView === "grading" || this.currentView === "grade-entry") && window.teacherView && typeof teacherView.renderGradeEntry === "function") {
+            } else if ((currentView === "grading" || currentView === "grade-entry") && window.teacherView && typeof teacherView.renderGradeEntry === "function") {
                 container.innerHTML = teacherView.renderGradeEntry();
             }
         } else if (user.role === "admin" && !this.adminActiveViewRole && window.adminView) {
-            const currentSection = sessionStorage.getItem("isms_admin_section") || "overview";
+            const currentSection = sessionStorage.getItem("isms_admin_section") || adminView.currentTab || "overview";
             if (["overview", "users", "academic", "results", "attendance", "finance"].includes(currentSection)) {
                 if (typeof adminView.switchSection === "function") {
                     adminView.switchSection(currentSection);

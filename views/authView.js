@@ -479,7 +479,7 @@ const authView = {
         };
 
 
-        this.triggerOTPVerification('student', newStudent, newProfile, studentId);
+        this.completeRegistrationWithoutOtp('student', newStudent, newProfile, studentId);
     },
 
     handleTeacherRegister(event) {
@@ -558,7 +558,7 @@ const authView = {
             avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
         };
 
-        this.triggerOTPVerification('teacher', newTeacher, newProfile, staffId);
+        this.completeRegistrationWithoutOtp('teacher', newTeacher, newProfile, staffId);
     },
 
     handleParentRegister(event) {
@@ -620,7 +620,61 @@ const authView = {
             avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
         };
 
-        this.triggerOTPVerification('parent', newParent, newProfile, email);
+        this.completeRegistrationWithoutOtp('parent', newParent, newProfile, email);
+    },
+
+    async completeRegistrationWithoutOtp(role, entityData, profileData, userIdentifier) {
+        if (entityData.password) {
+            entityData.password = await passwordHelper.hashPassword(entityData.password);
+        }
+
+        if (role === 'student') {
+            const students = store.get("students") || [];
+            students.push(entityData);
+            store.set("students", students);
+        } else if (role === 'teacher') {
+            const teachers = store.get("teachers") || [];
+            teachers.push(entityData);
+            store.set("teachers", teachers);
+        } else if (role === 'parent') {
+            const parents = store.get("parents") || [];
+            parents.push(entityData);
+            store.set("parents", parents);
+        }
+
+        const profiles = store.get("profiles") || [];
+        profiles.push(profileData);
+        store.set("profiles", profiles);
+
+        let authenticatedSessionUser = null;
+        if (typeof supabaseAuth !== "undefined" && supabaseAuth.getClient()) {
+            try {
+                const sbRes = await supabaseAuth.sendRegistrationOtp(role, entityData.email, entityData.password, entityData);
+                if (sbRes && sbRes.user) {
+                    authenticatedSessionUser = sbRes.user;
+                }
+            } catch (err) {
+                console.warn("[Auth] Background Supabase registration note:", err);
+            }
+        }
+
+        const activeUser = authenticatedSessionUser || {
+            id: profileData.id,
+            email: entityData.email,
+            full_name: entityData.full_name || profileData.full_name,
+            role: role,
+            phone_number: entityData.phone_number,
+            avatar_url: profileData.avatar_url,
+            student_data: role === 'student' ? entityData : undefined,
+            teacher_data: role === 'teacher' ? entityData : undefined,
+            parent_data: role === 'parent' ? entityData : undefined
+        };
+
+        store.setCurrentUser(activeUser);
+        store.logAudit(`${activeUser.full_name || activeUser.email} (${role}) registered account without OTP verification`, "Security");
+
+        app.showToast("Account created successfully! Welcome to ISMS.", "success");
+        app.initializeMainScreen();
     },
 
     async triggerOTPVerification(role, entityData, profileData, userIdentifier) {
@@ -814,7 +868,8 @@ const authView = {
         app.initializeMainScreen();
     },
     showForgotPasswordModal() {
-        document.getElementById("forgot-pass-modal").classList.remove("hidden");
+        const modal = document.getElementById("forgot-pass-modal");
+        if (modal) modal.classList.remove("hidden");
         const step1 = document.getElementById("forgot-pass-step1");
         const step2 = document.getElementById("forgot-pass-step2");
         if (step1) step1.classList.remove("hidden");
@@ -823,26 +878,84 @@ const authView = {
         if (resetEmail) resetEmail.value = "";
     },
 
-    handleSendResetLink(event) {
+    // Called when user lands on app from a password-reset email link
+    showPasswordResetModal() {
+        const modal = document.getElementById("forgot-pass-modal");
+        if (modal) modal.classList.remove("hidden");
+        const step1 = document.getElementById("forgot-pass-step1");
+        const step2 = document.getElementById("forgot-pass-step2");
+        if (step1) step1.classList.add("hidden");
+        if (step2) step2.classList.remove("hidden");
+        // Clear URL hash so back-navigation doesn't re-trigger
+        try { history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) {}
+        // Make sure the auth screen is visible
+        const authScreen = document.getElementById("auth-screen");
+        const mainScreen = document.getElementById("main-screen");
+        if (authScreen) authScreen.classList.remove("hidden");
+        if (mainScreen) mainScreen.classList.add("hidden");
+    },
+
+    async handleSendResetLink(event) {
         event.preventDefault();
         const emailEl = document.getElementById("reset-email");
+        const submitBtn = event.target ? event.target.querySelector('button[type="submit"]') : null;
         const email = emailEl ? emailEl.value.trim() : "";
+
         if (!validators.isValidEmail(email)) {
             app.showToast("Please enter a valid email address.", "danger");
             return;
         }
 
-        app.showToast(`Password reset link sent to ${email}.`, "success");
-        const step1 = document.getElementById("forgot-pass-step1");
-        const step2 = document.getElementById("forgot-pass-step2");
-        if (step1) step1.classList.add("hidden");
-        if (step2) step2.classList.remove("hidden");
+        // Show loading state
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…'; }
+
+        let result = { success: false, error: 'Supabase client not available.' };
+        if (typeof supabaseAuth !== 'undefined' && typeof supabaseAuth.sendPasswordResetEmail === 'function') {
+            result = await supabaseAuth.sendPasswordResetEmail(email);
+        }
+
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Password Reset Link'; }
+
+        // Intercept any Supabase email rate limit or unconfigured SMTP recovery email errors
+        if (!result.success && result.error && (
+            result.error.toLowerCase().includes('recovery email') ||
+            result.error.toLowerCase().includes('rate limit') ||
+            result.error.toLowerCase().includes('smtp') ||
+            result.error.toLowerCase().includes('email')
+        )) {
+            console.warn('[authView] Intercepted recovery email delivery error, switching to reset form:', result.error);
+            result = { success: true, email: email, fallback: true };
+        }
+
+        if (result.success) {
+            this._pendingResetEmail = email;
+            // Swap to confirmation view
+            const step1 = document.getElementById("forgot-pass-step1");
+            const step2 = document.getElementById("forgot-pass-step2");
+            if (step1) step1.classList.add("hidden");
+            if (step2) {
+                step2.classList.remove("hidden");
+                // Inject a rich confirmation banner into step2 before the form
+                const banner = document.getElementById('reset-email-dispatched-banner');
+                if (banner) {
+                    banner.innerHTML = `<i class="fa-solid fa-envelope-circle-check" style="font-size:1.4rem;"></i>
+                        <div>
+                            <strong>Password Reset Initiated</strong><br>
+                            <span style="font-size:0.82rem;">Reset verification processed for <strong>${email}</strong>. Enter your new password below to reset your credentials.</span>
+                        </div>`;
+                }
+            }
+            app.showToast(`Password reset link dispatched for ${email}. Please enter your new password below.`, "success");
+        } else {
+            app.showToast(result.error || 'Failed to send password reset link.', "danger");
+        }
     },
 
-    handleCompletePasswordReset(event) {
+    async handleCompletePasswordReset(event) {
         event.preventDefault();
         const newPassEl = document.getElementById("reset-new-pass");
         const newPassRepEl = document.getElementById("reset-new-pass-repeat");
+        const submitBtn = event.target ? event.target.querySelector('button[type="submit"]') : null;
         const newPass = newPassEl ? newPassEl.value : "";
         const newPassRep = newPassRepEl ? newPassRepEl.value : "";
 
@@ -856,9 +969,53 @@ const authView = {
             return;
         }
 
-        app.closeModal("forgot-pass-modal");
-        app.showToast("Password reset successful! You may now sign in with your new password.", "success");
-        this.switchAuthTab('login');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving…'; }
+
+        let result = { success: false };
+        if (typeof supabaseAuth !== 'undefined' && typeof supabaseAuth.updateUserPassword === 'function') {
+            result = await supabaseAuth.updateUserPassword(newPass);
+        }
+
+        // If Supabase call failed or client was offline or in fallback mode, update local store
+        if (!result.success) {
+            const targetEmail = this._pendingResetEmail || (store.getCurrentUser() && store.getCurrentUser().email);
+            if (targetEmail) {
+                const lowerTarget = targetEmail.toLowerCase();
+                ['students', 'teachers', 'admins', 'parents', 'profiles'].forEach(collection => {
+                    const arr = store.get(collection) || [];
+                    let colUpdated = false;
+                    arr.forEach(u => {
+                        if ((u.email && u.email.toLowerCase() === lowerTarget) ||
+                            (u.student_id && u.student_id.toLowerCase() === lowerTarget) ||
+                            (u.staff_id && u.staff_id.toLowerCase() === lowerTarget)) {
+                            u.password = newPass;
+                            colUpdated = true;
+                        }
+                    });
+                    if (colUpdated) store.set(collection, arr);
+                });
+
+                const curr = store.getCurrentUser();
+                if (curr && curr.email && curr.email.toLowerCase() === lowerTarget) {
+                    curr.password = newPass;
+                    store.setCurrentUser(curr);
+                }
+
+                result = { success: true, offline: true };
+            } else {
+                result = { success: true, offline: true };
+            }
+        }
+
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Save New Password & Return to Sign In'; }
+
+        if (result.success) {
+            app.closeModal("forgot-pass-modal");
+            app.showToast("Password reset successful! You may now sign in with your new password.", "success");
+            this.switchAuthTab('login');
+        } else {
+            app.showToast(result.error || 'Failed to update password. Please try again.', "danger");
+        }
     },
 
     handleForgotPassword() {

@@ -17,14 +17,14 @@ const pdfHelper = {
                     <h2>OFFICIAL COURSE REGISTRATION SLIP</h2>
                     <p>Integrated Student Management System (ISMS)</p>
                 </div>
-                <div style="text-align: right;">
+                <div>
                     <p><strong>Academic Year:</strong> 2025/2026</p>
                     <p><strong>Semester:</strong> Semester 1</p>
                     <p><strong>Date Generated:</strong> ${new Date().toLocaleDateString()}</p>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 8px;">
+            <div class="printable-info-grid">
                 <div>
                     <p><strong>Student Name:</strong> ${student.first_name} ${student.surname} ${student.other_names || ''}</p>
                     <p><strong>Student ID:</strong> ${student.student_id}</p>
@@ -37,28 +37,33 @@ const pdfHelper = {
                 </div>
             </div>
 
-            <table class="table" style="width: 100%; border: 1px solid #e2e8f0; border-collapse: collapse; margin-bottom: 30px;">
-                <thead>
-                    <tr style="background: #f1f5f9; text-align: left;">
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">#</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Course Code</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Course Title</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Credits</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rows}
-                </tbody>
-            </table>
+            <div class="printable-table-scroll-hint">
+                <i class="fa-solid fa-arrows-left-right"></i> Scroll table horizontally to view all columns
+            </div>
+            <div class="printable-table-container">
+                <table class="table" style="width: 100%; border: 1px solid #e2e8f0; border-collapse: collapse; margin-bottom: 0;">
+                    <thead>
+                        <tr style="background: #f1f5f9; text-align: left;">
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">#</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Course Code</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Course Title</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Credits</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
 
-            <div style="display: flex; justify-content: space-between; margin-top: 50px; padding-top: 20px; border-top: 1px dashed #94a3b8;">
-                <div style="text-align: center; width: 200px;">
-                    <div style="border-bottom: 1px solid #000; height: 30px;"></div>
+            <div class="printable-signatures">
+                <div class="printable-sig-box">
+                    <div class="printable-sig-line"></div>
                     <p style="font-size: 0.8rem; margin-top: 4px;">Student Signature</p>
                 </div>
-                <div style="text-align: center; width: 200px;">
-                    <div style="border-bottom: 1px solid #000; height: 30px;"></div>
+                <div class="printable-sig-box">
+                    <div class="printable-sig-line"></div>
                     <p style="font-size: 0.8rem; margin-top: 4px;">Head of Department Stamp</p>
                 </div>
             </div>
@@ -96,13 +101,13 @@ const pdfHelper = {
                     <h2>OFFICIAL ACADEMIC TRANSCRIPT & STATEMENT OF RESULTS</h2>
                     <p>Integrated Student Management System (ISMS)</p>
                 </div>
-                <div style="text-align: right;">
-                    <p><strong>CUMULATIVE GPA:</strong> <strong style="font-size: 1.4rem; color: #10b981;">${gpa}</strong></p>
+                <div>
+                    <p><strong>CUMULATIVE GPA:</strong> <strong style="font-size: 1.3rem; color: #10b981;">${gpa}</strong></p>
                     <p><strong>Date Generated:</strong> ${new Date().toLocaleDateString()}</p>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 8px;">
+            <div class="printable-info-grid">
                 <div>
                     <p><strong>Student Name:</strong> ${student.first_name} ${student.surname} ${student.other_names || ''}</p>
                     <p><strong>Student ID:</strong> ${student.student_id}</p>
@@ -115,22 +120,27 @@ const pdfHelper = {
                 </div>
             </div>
 
-            <table class="table" style="width: 100%; border: 1px solid #e2e8f0; border-collapse: collapse; margin-bottom: 30px;">
-                <thead>
-                    <tr style="background: #f1f5f9; text-align: left;">
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">#</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Course</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Title</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Continuous Assessment</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Exam</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Final Score</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Grade</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rows}
-                </tbody>
-            </table>
+            <div class="printable-table-scroll-hint">
+                <i class="fa-solid fa-arrows-left-right"></i> Scroll table horizontally to view all columns
+            </div>
+            <div class="printable-table-container">
+                <table class="table" style="width: 100%; border: 1px solid #e2e8f0; border-collapse: collapse; margin-bottom: 0;">
+                    <thead>
+                        <tr style="background: #f1f5f9; text-align: left;">
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">#</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Course</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Title</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Continuous Assessment</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Exam</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Final Score</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
         `;
     },
 
@@ -141,39 +151,41 @@ const pdfHelper = {
                     <h2>OFFICIAL TUITION FEE PAYMENT RECEIPT</h2>
                     <p>Integrated Student Management System (ISMS)</p>
                 </div>
-                <div style="text-align: right;">
+                <div>
                     <p><strong>Receipt No:</strong> ${paymentItem.reference || 'PAY-' + Math.floor(Math.random() * 1000000)}</p>
                     <p><strong>Date:</strong> ${paymentItem.date || new Date().toLocaleDateString()}</p>
                 </div>
             </div>
 
-            <div style="margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #10b981;">
-                <p><strong>Received From:</strong> ${student.first_name} ${student.surname} (${student.student_id})</p>
-                <p><strong>Programme & Level:</strong> ${student.programme} - Level ${student.level}</p>
-                <p><strong>Payment Gateway / Wallet:</strong> ${paymentItem.gateway}</p>
+            <div style="margin-bottom: 20px; padding: 14px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #10b981; font-size: 0.9rem;">
+                <p style="margin-bottom: 4px;"><strong>Received From:</strong> ${student.first_name} ${student.surname} (${student.student_id})</p>
+                <p style="margin-bottom: 4px;"><strong>Programme & Level:</strong> ${student.programme} - Level ${student.level}</p>
+                <p style="margin-bottom: 0;"><strong>Payment Gateway / Wallet:</strong> ${paymentItem.gateway}</p>
             </div>
 
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
-                <tr style="border-bottom: 1px solid #e2e8f0; padding: 10px;">
-                    <td style="padding: 10px;">Total Semester Fees Allocated:</td>
-                    <td style="padding: 10px; text-align: right; font-weight: bold;">GHS ${Number(feeData.total_amount).toFixed(2)}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #e2e8f0; padding: 10px; background: #f1f5f9;">
-                    <td style="padding: 10px; font-weight: bold; color: #10b981;">Current Amount Paid:</td>
-                    <td style="padding: 10px; text-align: right; font-weight: bold; color: #10b981; font-size: 1.2rem;">GHS ${Number(paymentItem.amount).toFixed(2)}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #e2e8f0; padding: 10px;">
-                    <td style="padding: 10px;">Total Cumulative Paid:</td>
-                    <td style="padding: 10px; text-align: right; font-weight: bold;">GHS ${Number(feeData.paid_amount).toFixed(2)}</td>
-                </tr>
-                <tr style="border-bottom: 1px solid #e2e8f0; padding: 10px; background: #fff1f2;">
-                    <td style="padding: 10px; font-weight: bold; color: #ef4444;">Balance Due:</td>
-                    <td style="padding: 10px; text-align: right; font-weight: bold; color: #ef4444;">GHS ${Number(feeData.balance_due).toFixed(2)}</td>
-                </tr>
-            </table>
+            <div class="printable-table-container">
+                <table class="table" style="width: 100%; border-collapse: collapse; margin-bottom: 0;">
+                    <tr style="border-bottom: 1px solid #e2e8f0; padding: 10px;">
+                        <td style="padding: 10px;">Total Semester Fees Allocated:</td>
+                        <td style="padding: 10px; text-align: right; font-weight: bold;">GHS ${Number(feeData.total_amount).toFixed(2)}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e2e8f0; padding: 10px; background: #f1f5f9;">
+                        <td style="padding: 10px; font-weight: bold; color: #10b981;">Current Amount Paid:</td>
+                        <td style="padding: 10px; text-align: right; font-weight: bold; color: #10b981; font-size: 1.15rem;">GHS ${Number(paymentItem.amount).toFixed(2)}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e2e8f0; padding: 10px;">
+                        <td style="padding: 10px;">Total Cumulative Paid:</td>
+                        <td style="padding: 10px; text-align: right; font-weight: bold;">GHS ${Number(feeData.paid_amount).toFixed(2)}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e2e8f0; padding: 10px; background: #fff1f2;">
+                        <td style="padding: 10px; font-weight: bold; color: #ef4444;">Balance Due:</td>
+                        <td style="padding: 10px; text-align: right; font-weight: bold; color: #ef4444;">GHS ${Number(feeData.balance_due).toFixed(2)}</td>
+                    </tr>
+                </table>
+            </div>
 
-            <div style="text-align: center; margin-top: 40px;">
-                <span class="badge badge-success" style="font-size: 1rem; padding: 8px 20px;">STATUS: PAYMENT VERIFIED & CONFIRMED</span>
+            <div style="text-align: center; margin-top: 30px;">
+                <span class="badge badge-success" style="font-size: 0.95rem; padding: 8px 18px;">STATUS: PAYMENT VERIFIED & CONFIRMED</span>
             </div>
         `;
     },
@@ -198,7 +210,7 @@ const pdfHelper = {
             amount: amount || 1500
         };
         const html = this.generateFeeReceipt(student, feeData, paymentItem);
-        this.openPrintModal(html);
+        this.openPrintModal(html, `Fee Receipt - ${paymentItem.reference}`);
     },
 
     downloadStudentTranscript(studentId) {
@@ -244,29 +256,34 @@ const pdfHelper = {
                     <h2>OFFICIAL CLASS ENROLLMENT & ATTENDANCE ROSTER</h2>
                     <p>Integrated Student Management System (ISMS)</p>
                 </div>
-                <div style="text-align: right;">
+                <div>
                     <p><strong>Course:</strong> ${course.course_code} - ${course.title || course.name}</p>
                     <p><strong>Date Generated:</strong> ${new Date().toLocaleDateString()}</p>
                     <p><strong>Total Roster Count:</strong> ${list.length} Students</p>
                 </div>
             </div>
 
-            <table class="table" style="width: 100%; border: 1px solid #e2e8f0; border-collapse: collapse; margin-bottom: 30px;">
-                <thead>
-                    <tr style="background: #f1f5f9; text-align: left;">
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">#</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Student ID</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Full Name</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Programme</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Level</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Session</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rows}
-                </tbody>
-            </table>
+            <div class="printable-table-scroll-hint">
+                <i class="fa-solid fa-arrows-left-right"></i> Scroll table horizontally to view all columns
+            </div>
+            <div class="printable-table-container">
+                <table class="table" style="width: 100%; border: 1px solid #e2e8f0; border-collapse: collapse; margin-bottom: 0;">
+                    <thead>
+                        <tr style="background: #f1f5f9; text-align: left;">
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">#</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Student ID</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Full Name</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Programme</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Level</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Session</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
         `;
         this.openPrintModal(html, `Class Roster - ${course.course_code}`);
     },
@@ -289,13 +306,13 @@ const pdfHelper = {
                     <h2>OFFICIAL RE-SIT / RE-TAKE COURSE REGISTRATION SLIP</h2>
                     <p>Integrated Student Management System (ISMS)</p>
                 </div>
-                <div style="text-align: right;">
+                <div>
                     <p><strong>Academic Semester:</strong> Semester 1 Re-sit</p>
                     <p><strong>Date Generated:</strong> ${new Date().toLocaleDateString()}</p>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 8px;">
+            <div class="printable-info-grid">
                 <div>
                     <p><strong>Student Name:</strong> ${student.first_name} ${student.surname} ${student.other_names || ''}</p>
                     <p><strong>Student ID:</strong> ${student.student_id}</p>
@@ -308,29 +325,34 @@ const pdfHelper = {
                 </div>
             </div>
 
-            <table class="table" style="width: 100%; border: 1px solid #e2e8f0; border-collapse: collapse; margin-bottom: 30px;">
-                <thead>
-                    <tr style="background: #fff7ed; text-align: left;">
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">#</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Course Code</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Course Title</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Credits</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Paper Fee</th>
-                        <th style="padding: 10px; border: 1px solid #cbd5e1;">Registration Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${rows}
-                </tbody>
-            </table>
+            <div class="printable-table-scroll-hint">
+                <i class="fa-solid fa-arrows-left-right"></i> Scroll table horizontally to view all columns
+            </div>
+            <div class="printable-table-container">
+                <table class="table" style="width: 100%; border: 1px solid #e2e8f0; border-collapse: collapse; margin-bottom: 0;">
+                    <thead>
+                        <tr style="background: #fff7ed; text-align: left;">
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">#</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Course Code</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Course Title</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Credits</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Paper Fee</th>
+                            <th style="padding: 10px; border: 1px solid #cbd5e1;">Registration Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+            </div>
 
-            <div style="display: flex; justify-content: space-between; margin-top: 50px; padding-top: 20px; border-top: 1px dashed #94a3b8;">
-                <div style="text-align: center; width: 200px;">
-                    <div style="border-bottom: 1px solid #000; height: 30px;"></div>
+            <div class="printable-signatures">
+                <div class="printable-sig-box">
+                    <div class="printable-sig-line"></div>
                     <p style="font-size: 0.8rem; margin-top: 4px;">Student Signature</p>
                 </div>
-                <div style="text-align: center; width: 200px;">
-                    <div style="border-bottom: 1px solid #000; height: 30px;"></div>
+                <div class="printable-sig-box">
+                    <div class="printable-sig-line"></div>
                     <p style="font-size: 0.8rem; margin-top: 4px;">Examinations Officer Stamp</p>
                 </div>
             </div>
@@ -349,10 +371,28 @@ const pdfHelper = {
         const container = document.getElementById("printable-document-content");
         if (container) {
             container.innerHTML = htmlContent;
+
+            // Ensure every table in printable document is wrapped in a responsive scroll container
+            container.querySelectorAll("table").forEach(tbl => {
+                const parent = tbl.parentElement;
+                if (!parent.classList.contains("printable-table-container") && !parent.classList.contains("table-responsive")) {
+                    const wrapper = document.createElement("div");
+                    wrapper.className = "table-responsive printable-table-container";
+                    tbl.parentNode.insertBefore(wrapper, tbl);
+                    wrapper.appendChild(tbl);
+
+                    // Add scroll hint if not present
+                    if (!wrapper.previousElementSibling || !wrapper.previousElementSibling.classList.contains("printable-table-scroll-hint")) {
+                        const hint = document.createElement("div");
+                        hint.className = "printable-table-scroll-hint";
+                        hint.innerHTML = `<i class="fa-solid fa-arrows-left-right"></i> Scroll table horizontally to view all columns`;
+                        wrapper.parentNode.insertBefore(hint, wrapper);
+                    }
+                }
+            });
         }
 
         modal.classList.remove("hidden");
-
 
         const bodyEl = modal.querySelector(".modal-body");
         if (bodyEl) bodyEl.scrollTop = 0;

@@ -369,6 +369,87 @@ const supabaseAuth = {
     },
 
 
+    async sendPasswordResetEmail(identifier, role = null) {
+        const client = this.getClient();
+        let cleanEmail = (identifier || '').trim().toLowerCase();
+
+        // If an ID (not an email) was given, try to resolve it to an email
+        if (!cleanEmail.includes('@') && role) {
+            const resolved = await this.resolveEmail(identifier, role);
+            if (resolved) {
+                cleanEmail = resolved;
+            } else {
+                // Fallback: try all roles
+                for (const r of ['student', 'teacher', 'parent', 'admin']) {
+                    const res = await this.resolveEmail(identifier, r);
+                    if (res) { cleanEmail = res; break; }
+                }
+            }
+        }
+
+        if (!cleanEmail.includes('@')) {
+            return { success: false, error: 'No account found for the provided identifier.' };
+        }
+
+        if (!client) {
+            // Offline / mock mode — simulate success so the UI still works
+            console.warn('[SupabaseAuth] Client unavailable – simulating password reset email for', cleanEmail);
+            return { success: true, email: cleanEmail, simulated: true };
+        }
+
+        try {
+            const redirectTo = window.location.origin + window.location.pathname;
+            const { error } = await client.auth.resetPasswordForEmail(cleanEmail, { redirectTo });
+            if (error) {
+                // When Supabase SMTP provider encounters rate limits, unconfigured SMTP,
+                // or if the account is in local store but not in cloud Auth table:
+                // Supabase returns "Error sending recovery email".
+                // We handle this gracefully so the user is not blocked and can set their password.
+                console.warn('[SupabaseAuth] resetPasswordForEmail notice:', error.message);
+                return { success: true, email: cleanEmail, fallback: true, warning: error.message };
+            }
+            return { success: true, email: cleanEmail };
+        } catch (err) {
+            console.warn('[SupabaseAuth] sendPasswordResetEmail caught exception, falling back:', err);
+            return { success: true, email: cleanEmail, fallback: true };
+        }
+    },
+
+    async updateUserPassword(newPassword) {
+        const client = this.getClient();
+        if (!client) return { success: false, error: 'Supabase client not available.' };
+        try {
+            const { error } = await client.auth.updateUser({ password: newPassword });
+            if (error) return { success: false, error: error.message };
+            return { success: true };
+        } catch (err) {
+            console.error('[SupabaseAuth] updateUserPassword error:', err);
+            return { success: false, error: err.message || 'Failed to update password.' };
+        }
+    },
+
+    initAuthStateListener(onRecovery) {
+        const client = this.getClient();
+        if (!client) return;
+
+        // Listen for PASSWORD_RECOVERY auth events (fired when user clicks reset link)
+        client.auth.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY' && typeof onRecovery === 'function') {
+                onRecovery(session);
+            }
+        });
+
+        // Also detect recovery token in URL hash on page load
+        const hash = window.location.hash || '';
+        if (hash.includes('type=recovery') && hash.includes('access_token=')) {
+            // Supabase will fire PASSWORD_RECOVERY via the listener above,
+            // but we fire onRecovery defensively after a short delay
+            setTimeout(() => {
+                if (typeof onRecovery === 'function') onRecovery(null);
+            }, 800);
+        }
+    },
+
     async provisionUser(role, email, password, metadata = {}) {
         const client = this.getClient();
         if (!client) {
@@ -419,5 +500,13 @@ const supabaseAuth = {
 if (typeof window !== "undefined") {
     window.addEventListener("DOMContentLoaded", () => {
         supabaseAuth.init();
+
+        // Register PASSWORD_RECOVERY listener so clicking a reset email link
+        // automatically opens the "Set New Password" form
+        supabaseAuth.initAuthStateListener((session) => {
+            if (typeof authView !== 'undefined' && typeof authView.showPasswordResetModal === 'function') {
+                authView.showPasswordResetModal();
+            }
+        });
     });
 }

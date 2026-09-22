@@ -459,6 +459,7 @@
                                 title="View Academic Calendar">
                                 <i class="fa-solid fa-calendar-days"></i> Calendar
                             </button>
+                            <span id="topbar-academic-session" class="badge badge-primary active-academic-session-label" style="font-size: 0.74rem; font-weight: 600; padding: 4px 9px; border-radius: var(--radius-sm);"><i class="fa-solid fa-graduation-cap"></i> 2026/2027 - Semester 1</span>
                         </div>
                     </div>
 
@@ -512,28 +513,44 @@
                     </form>
                 </div>
 
-                <div id="forgot-pass-step2" class="hidden">
-                    <div
-                        style="background: var(--status-success-bg); color: var(--status-success); padding: 12px; border-radius: var(--radius-md); font-size: 0.85rem; margin-bottom: 16px;">
-                        <i class="fa-solid fa-circle-check"></i> Verification link dispatched! Enter your new password
-                        below to reset your account.
+                                <div id="forgot-pass-step2" class="hidden">
+                    <div id="reset-email-dispatched-banner"
+                        style="background: var(--status-success-bg); color: var(--status-success); padding: 14px 16px; border-radius: var(--radius-md); font-size: 0.85rem; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px;">
+                        <i class="fa-solid fa-circle-check" style="font-size:1.2rem; margin-top:2px;"></i>
+                        <div>
+                            <strong>Check your email inbox.</strong><br>
+                            <span style="font-size:0.82rem;">A password reset link has been sent to your registered email address. Click the link in the email to be redirected back here, then set your new password below.</span>
+                        </div>
                     </div>
                     <form onsubmit="authView.handleCompletePasswordReset(event)">
                         <div class="form-group">
-                            <label for="reset-new-pass">New Password * <small class="text-muted">(Min 6, 1 Upper, 1 Num,
-                                    1 Symbol)</small></label>
-                            <input type="password" id="reset-new-pass" class="form-control" required>
+                            <label for="reset-new-pass">New Password * <small class="text-muted">(Min 6, 1 Upper, 1 Num, 1 Symbol)</small></label>
+                            <div style="position: relative;">
+                                <input type="password" id="reset-new-pass" class="form-control" required style="padding-right: 42px;">
+                                <button type="button"
+                                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);"
+                                    onclick="const i=document.getElementById('reset-new-pass');i.type=i.type==='password'?'text':'password';">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label for="reset-new-pass-repeat">Repeat New Password *</label>
-                            <input type="password" id="reset-new-pass-repeat" class="form-control" required>
+                            <label for="reset-new-pass-repeat">Confirm New Password *</label>
+                            <div style="position: relative;">
+                                <input type="password" id="reset-new-pass-repeat" class="form-control" required style="padding-right: 42px;">
+                                <button type="button"
+                                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);"
+                                    onclick="const i=document.getElementById('reset-new-pass-repeat');i.type=i.type==='password'?'text':'password';">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-success btn-block btn-lg">
-                            <i class="fa-solid fa-lock"></i> Save New Password & Return to Sign In
+                            <i class="fa-solid fa-lock"></i> Save New Password &amp; Return to Sign In
                         </button>
                     </form>
                 </div>
-            </div>
+</div>
         </div>
     </div>
 
@@ -1559,48 +1576,7 @@
     </div>
 
 
-    <div id="otp-verification-modal" class="modal-overlay hidden">
-        <div class="modal-content modal-md">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-shield-halved" style="color: var(--brand-primary);"></i> Email OTP
-                    Verification</h3>
-                <button class="modal-close" onclick="app.closeModal('otp-verification-modal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div
-                    style="background: rgba(37, 99, 235, 0.08); border-left: 4px solid var(--brand-primary); padding: 12px 14px; border-radius: var(--radius-sm); margin-bottom: 16px;">
-                    <div
-                        style="color: var(--brand-primary); font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 8px;">
-                        <i class="fa-solid fa-envelope-open-text"></i>
-                        <span>Dispatched to: <strong id="otp-sent-target">user@example.com</strong></span>
-                    </div>
-                    <small style="color: var(--text-secondary); display: block; margin-top: 4px;">Please check your
-                        inbox and spam/junk folder for the 6-digit passcode.</small>
-                </div>
-                <form id="otp-verification-form" onsubmit="authView.verifyAndCompleteRegistration(event)">
-                    <div class="form-group" style="margin-bottom: 16px;">
-                        <label for="otp-input-code" style="font-weight: 600;">Enter 6-Digit Email Passcode *</label>
-                        <input type="text" id="otp-input-code" class="form-control text-center" placeholder="123456"
-                            maxlength="6"
-                            style="font-size: 1.5rem; letter-spacing: 6px; font-weight: 700; height: 52px;" required
-                            autocomplete="one-time-code" autofocus>
-                    </div>
-                    <button type="submit" id="otp-verify-submit-btn" class="btn btn-primary btn-block btn-lg">
-                        <i class="fa-solid fa-user-check"></i> Verify OTP
-                    </button>
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-color);">
-                        <span id="otp-resend-status" style="font-size: 0.8rem; color: var(--text-secondary);">Didn't
-                            receive email?</span>
-                        <button type="button" id="otp-resend-btn" class="btn btn-xs btn-outline-secondary"
-                            onclick="authView.resendRegistrationOTP()">
-                            <i class="fa-solid fa-rotate-right"></i> Resend OTP Code
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- OTP verification modal removed: registration now completes instantly without email OTP -->
 
 
     <script src="config.js"></script>
