@@ -68,7 +68,7 @@ const studentView = {
             
             <div class="dashboard-grid">
                 <div class="grid-column">
-                    <div class="card" id="student-chart-card">
+                    <div class="card student-dashboard-container" id="student-chart-card">
                         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                             <h3><i class="fa-solid fa-chart-line" style="color: var(--brand-primary);"></i> Academic Progress Overview</h3>
                             <span id="chart-gpa-badge" class="badge badge-info" style="font-size: 0.8rem; padding: 4px 10px;">Cumulative GPA: ${gpa} / 4.00</span>
@@ -78,7 +78,7 @@ const studentView = {
                         </div>
                     </div>
 
-                    <div class="card">
+                    <div class="card student-dashboard-container" id="stu-recent-attendance-container">
                         <div class="card-header">
                             <h3><i class="fa-solid fa-calendar-check" style="color: var(--status-success);"></i> Recent Attendance Register</h3>
                             <button class="btn btn-sm btn-outline-primary" onclick="app.navigateTo('attendance')">View All</button>
@@ -107,7 +107,7 @@ const studentView = {
                 </div>
 
                 <div class="grid-column">
-                    <div class="card">
+                    <div class="card student-dashboard-container" id="stu-latest-announcements-container">
                         <div class="card-header">
                             <h3><i class="fa-solid fa-bullhorn" style="color: var(--brand-secondary);"></i> Latest Announcements</h3>
                         </div>
@@ -122,7 +122,7 @@ const studentView = {
                         </div>
                     </div>
 
-                    <div class="card">
+                    <div class="card student-dashboard-container" id="stu-need-assistant-container">
                         <div class="card-header">
                             <h3><i class="fa-solid fa-headset" style="color: var(--status-info);"></i> Need Assistance?</h3>
                         </div>

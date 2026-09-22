@@ -1060,10 +1060,22 @@ h6 {
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     gap: 24px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
+.grid-column {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
 
 .card {
     background: var(--bg-card);
@@ -1073,20 +1085,37 @@ h6 {
     box-shadow: var(--shadow-sm);
     margin-bottom: 24px;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     transition: var(--transition-fast);
 }
 
-
 .teacher-dashboard-container,
+.student-dashboard-container,
+.parent-dashboard-container,
 #tc-analytics-container,
 #tc-assigned-courses-container,
 #tc-attendance-submissions-container,
 #tc-quick-actions-container,
 #tc-bulletins-container,
-#tc-complaints-container {
+#tc-complaints-container,
+#tc-mark-attendance-container,
+#tc-attendance-history-container,
+#tc-assigned-modules-overview-container,
+#tc-upload-materials-container,
+#student-chart-card,
+#stu-recent-attendance-container,
+#stu-latest-announcements-container,
+#stu-need-assistant-container,
+#ward-results-container,
+#ward-attendance-container,
+#ward-fee-summary-container,
+#ward-bulletins-container {
     background: var(--bg-card);
     max-width: 100%;
     width: 100%;
+    min-width: 0;
     border-radius: var(--radius-lg);
     padding: 24px;
     box-shadow: var(--shadow-sm);
@@ -1094,26 +1123,55 @@ h6 {
     margin-bottom: 24px;
     transition: var(--transition-fast);
     box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 [data-theme="dark"] .teacher-dashboard-container,
+[data-theme="dark"] .student-dashboard-container,
+[data-theme="dark"] .parent-dashboard-container,
 [data-theme="dark"] #tc-analytics-container,
 [data-theme="dark"] #tc-assigned-courses-container,
 [data-theme="dark"] #tc-attendance-submissions-container,
 [data-theme="dark"] #tc-quick-actions-container,
 [data-theme="dark"] #tc-bulletins-container,
-[data-theme="dark"] #tc-complaints-container {
+[data-theme="dark"] #tc-complaints-container,
+[data-theme="dark"] #tc-mark-attendance-container,
+[data-theme="dark"] #tc-attendance-history-container,
+[data-theme="dark"] #tc-assigned-modules-overview-container,
+[data-theme="dark"] #tc-upload-materials-container,
+[data-theme="dark"] #student-chart-card,
+[data-theme="dark"] #stu-recent-attendance-container,
+[data-theme="dark"] #stu-latest-announcements-container,
+[data-theme="dark"] #stu-need-assistant-container,
+[data-theme="dark"] #ward-results-container,
+[data-theme="dark"] #ward-attendance-container,
+[data-theme="dark"] #ward-fee-summary-container,
+[data-theme="dark"] #ward-bulletins-container {
     background: #1e293b;
     border-color: #334155;
 }
 
 .teacher-dashboard-container:hover,
+.student-dashboard-container:hover,
+.parent-dashboard-container:hover,
 #tc-analytics-container:hover,
 #tc-assigned-courses-container:hover,
 #tc-attendance-submissions-container:hover,
 #tc-quick-actions-container:hover,
 #tc-bulletins-container:hover,
-#tc-complaints-container:hover {
+#tc-complaints-container:hover,
+#tc-mark-attendance-container:hover,
+#tc-attendance-history-container:hover,
+#tc-assigned-modules-overview-container:hover,
+#tc-upload-materials-container:hover,
+#student-chart-card:hover,
+#stu-recent-attendance-container:hover,
+#stu-latest-announcements-container:hover,
+#stu-need-assistant-container:hover,
+#ward-results-container:hover,
+#ward-attendance-container:hover,
+#ward-fee-summary-container:hover,
+#ward-bulletins-container:hover {
     box-shadow: var(--shadow-glow), var(--shadow-md);
     transform: translateY(-2px);
 }
@@ -1426,7 +1484,21 @@ h6 {
 
 @media (max-width: 1024px) {
     .dashboard-grid {
-        grid-template-columns: 1fr;
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        gap: 20px !important;
+    }
+
+    .grid-column {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        gap: 20px !important;
     }
 
     .topbar {
@@ -1520,19 +1592,31 @@ h6 {
     .card,
     .student-dashboard-container,
     .teacher-dashboard-container,
+    .parent-dashboard-container,
     #tc-analytics-container,
     #tc-assigned-courses-container,
     #tc-attendance-submissions-container,
     #tc-quick-actions-container,
     #tc-bulletins-container,
-    #tc-complaints-container {
+    #tc-complaints-container,
+    #tc-mark-attendance-container,
+    #tc-attendance-history-container,
+    #tc-assigned-modules-overview-container,
+    #tc-upload-materials-container,
+    #student-chart-card,
+    #stu-recent-attendance-container,
+    #stu-latest-announcements-container,
+    #stu-need-assistant-container,
+    #ward-results-container,
+    #ward-attendance-container,
+    #ward-fee-summary-container,
+    #ward-bulletins-container {
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
-        padding: 14px 12px !important;
+        padding: 16px 14px !important;
         margin-bottom: 16px !important;
         border-radius: var(--radius-md) !important;
-        overflow-x: hidden !important;
     }
 
     .card-header {
@@ -1749,16 +1833,22 @@ h6 {
     }
 
     .dashboard-grid {
-        grid-template-columns: 1fr !important;
+        display: flex !important;
+        flex-direction: column !important;
         gap: 16px !important;
         width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
     }
 
     .grid-column {
         width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
         display: flex !important;
         flex-direction: column !important;
         gap: 16px !important;
+        box-sizing: border-box !important;
     }
 
     .card-header {
@@ -2899,4 +2989,613 @@ body {
         height: 350px !important;
         max-height: 400px !important;
     }
+}
+
+/* =====================================================================
+   DASHBOARD CONTAINERS: COMPREHENSIVE MOBILE RESPONSIVENESS
+   Fixes for Teacher, Student & Parent Dashboard containers
+   ===================================================================== */
+
+/* Ensure student-dashboard-container matches teacher/parent containers */
+.student-dashboard-container {
+    background: var(--bg-card);
+    max-width: 100%;
+    width: 100%;
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    margin-bottom: 24px;
+    transition: var(--transition-fast);
+    box-sizing: border-box;
+}
+
+/* Fast touch response for ALL interactive elements - no 300ms delay */
+button,
+a,
+[role="button"],
+[onclick],
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+select,
+label[for],
+.btn,
+.nav-item,
+.sidebar-link,
+.stat-card,
+.pill-btn,
+.btn-demo,
+.calendar-day,
+.auth-tab {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+}
+
+/* Active state visual feedback for instant touch response */
+.btn:active,
+[onclick]:active,
+.nav-item:active,
+.sidebar-link:active,
+.stat-card:active {
+    transform: scale(0.97);
+    transition: transform 0.08s ease;
+}
+
+/* -------------------------------------------------------
+   Mobile & Tablet Dynamic Auto-Adjusting Layouts (≤ 991px)
+   ------------------------------------------------------- */
+@media (max-width: 991px) {
+    /* Collapse multi-column grid into a smooth single-column flow */
+    .dashboard-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        gap: 18px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .grid-column {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        gap: 18px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* All 18 dashboard containers auto-adjust to full viewport width */
+    .teacher-dashboard-container,
+    .student-dashboard-container,
+    .parent-dashboard-container,
+    #tc-analytics-container,
+    #tc-assigned-courses-container,
+    #tc-attendance-submissions-container,
+    #tc-quick-actions-container,
+    #tc-bulletins-container,
+    #tc-complaints-container,
+    #tc-mark-attendance-container,
+    #tc-attendance-history-container,
+    #tc-assigned-modules-overview-container,
+    #tc-upload-materials-container,
+    #student-chart-card,
+    #stu-recent-attendance-container,
+    #stu-latest-announcements-container,
+    #stu-need-assistant-container,
+    #ward-results-container,
+    #ward-attendance-container,
+    #ward-fee-summary-container,
+    #ward-bulletins-container {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+        padding: 20px 18px !important;
+        margin-bottom: 18px !important;
+    }
+}
+
+/* -------------------------------------------------------
+   Mobile Auto-Adjusting Layouts: ≤ 768px
+   ------------------------------------------------------- */
+@media (max-width: 768px) {
+
+    /* Main view container boundary isolation */
+    .view-container,
+    #view-container {
+        width: 100% !important;
+        max-width: 100vw !important;
+        padding: 14px 10px !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    /* All dashboard containers mobile padding & isolation */
+    .teacher-dashboard-container,
+    .student-dashboard-container,
+    .parent-dashboard-container,
+    #tc-analytics-container,
+    #tc-assigned-courses-container,
+    #tc-attendance-submissions-container,
+    #tc-quick-actions-container,
+    #tc-bulletins-container,
+    #tc-complaints-container,
+    #tc-mark-attendance-container,
+    #tc-attendance-history-container,
+    #tc-assigned-modules-overview-container,
+    #tc-upload-materials-container,
+    #student-chart-card,
+    #stu-recent-attendance-container,
+    #stu-latest-announcements-container,
+    #stu-need-assistant-container,
+    #ward-results-container,
+    #ward-attendance-container,
+    #ward-fee-summary-container,
+    #ward-bulletins-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        padding: 16px 14px !important;
+        margin-bottom: 16px !important;
+        border-radius: var(--radius-md) !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Card headers inside dashboard containers stack cleanly */
+    .teacher-dashboard-container .card-header,
+    .student-dashboard-container .card-header,
+    .parent-dashboard-container .card-header,
+    #tc-analytics-container .card-header,
+    #tc-assigned-courses-container .card-header,
+    #tc-attendance-submissions-container .card-header,
+    #tc-quick-actions-container .card-header,
+    #tc-bulletins-container .card-header,
+    #tc-complaints-container .card-header,
+    #tc-mark-attendance-container .card-header,
+    #tc-attendance-history-container .card-header,
+    #tc-assigned-modules-overview-container .card-header,
+    #tc-upload-materials-container .card-header,
+    #student-chart-card .card-header,
+    #stu-recent-attendance-container .card-header,
+    #stu-latest-announcements-container .card-header,
+    #stu-need-assistant-container .card-header,
+    #ward-results-container .card-header,
+    #ward-attendance-container .card-header,
+    #ward-fee-summary-container .card-header,
+    #ward-bulletins-container .card-header {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding-bottom: 10px !important;
+    }
+
+    /* Header titles wrap smoothly */
+    .teacher-dashboard-container .card-header h3,
+    .student-dashboard-container .card-header h3,
+    .parent-dashboard-container .card-header h3,
+    .teacher-dashboard-container .card-header h4,
+    .student-dashboard-container .card-header h4,
+    .parent-dashboard-container .card-header h4,
+    #tc-analytics-container .card-header h3,
+    #tc-assigned-courses-container .card-header h3,
+    #tc-attendance-submissions-container .card-header h3,
+    #tc-quick-actions-container .card-header h3,
+    #tc-bulletins-container .card-header h3,
+    #tc-complaints-container .card-header h3,
+    #tc-mark-attendance-container .card-header h3,
+    #tc-attendance-history-container .card-header h3,
+    #tc-assigned-modules-overview-container .card-header h3,
+    #tc-upload-materials-container .card-header h3,
+    #student-chart-card .card-header h3,
+    #stu-recent-attendance-container .card-header h3,
+    #stu-latest-announcements-container .card-header h3,
+    #stu-need-assistant-container .card-header h3,
+    #ward-results-container .card-header h3,
+    #ward-attendance-container .card-header h3,
+    #ward-fee-summary-container .card-header h3,
+    #ward-bulletins-container .card-header h3 {
+        font-size: 1.05rem !important;
+        margin: 0 !important;
+        line-height: 1.35 !important;
+        word-break: break-word !important;
+        overflow-wrap: anywhere !important;
+        width: 100% !important;
+    }
+
+    /* Header buttons and badges take full width on mobile */
+    .teacher-dashboard-container .card-header .btn,
+    .student-dashboard-container .card-header .btn,
+    .parent-dashboard-container .card-header .btn,
+    .teacher-dashboard-container .card-header .badge,
+    .student-dashboard-container .card-header .badge,
+    .parent-dashboard-container .card-header .badge,
+    .teacher-dashboard-container .card-header > div,
+    .student-dashboard-container .card-header > div,
+    .parent-dashboard-container .card-header > div,
+    #tc-assigned-courses-container .card-header .btn,
+    #tc-attendance-submissions-container .card-header .btn,
+    #stu-recent-attendance-container .card-header .btn,
+    #ward-results-container .card-header .btn,
+    #ward-attendance-container .card-header .btn,
+    #ward-attendance-container .card-header div,
+    #student-chart-card .card-header .badge {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        min-height: 40px !important;
+        box-sizing: border-box !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        margin: 0 !important;
+    }
+
+    /* Form rows inside attendance, quizzes, and lookup containers stack vertically */
+    #tc-mark-attendance-container .form-row,
+    #tc-attendance-history-container .form-row,
+    #tc-upload-materials-container .form-row,
+    .teacher-dashboard-container .form-row,
+    .student-dashboard-container .form-row,
+    .parent-dashboard-container .form-row {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        gap: 10px !important;
+        margin-bottom: 12px !important;
+    }
+
+    #tc-mark-attendance-container .form-group,
+    #tc-attendance-history-container .form-group,
+    #tc-upload-materials-container .form-group,
+    #tc-mark-attendance-container .col-6,
+    #tc-mark-attendance-container .col-12,
+    #tc-attendance-history-container .col-12 {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-bottom: 6px !important;
+        box-sizing: border-box !important;
+    }
+
+    #tc-mark-attendance-container .form-control,
+    #tc-attendance-history-container .form-control,
+    #tc-upload-materials-container .form-control {
+        min-height: 44px !important;
+        font-size: 0.92rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Table responsive scrolling in all dashboard containers */
+    .teacher-dashboard-container .table-responsive,
+    .student-dashboard-container .table-responsive,
+    .parent-dashboard-container .table-responsive,
+    #tc-assigned-courses-container .table-responsive,
+    #tc-attendance-submissions-container .table-responsive,
+    #tc-mark-attendance-container .table-responsive,
+    #tc-attendance-history-container .table-responsive,
+    #tc-assigned-modules-overview-container .table-responsive,
+    #stu-recent-attendance-container .table-responsive,
+    #ward-attendance-container .table-responsive {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        display: block !important;
+        box-sizing: border-box !important;
+        margin-top: 10px !important;
+        margin-bottom: 12px !important;
+        border-radius: var(--radius-sm) !important;
+        position: relative !important;
+    }
+
+    /* Tables with 3 columns fit without forced 540px width */
+    #tc-mark-attendance-container .table,
+    #stu-recent-attendance-container .table {
+        min-width: 100% !important;
+        width: 100% !important;
+    }
+
+    /* Multi-column tables scroll cleanly inside isolated card */
+    #tc-assigned-courses-container .table,
+    #tc-attendance-submissions-container .table,
+    #tc-attendance-history-container .table,
+    #tc-assigned-modules-overview-container .table,
+    #ward-attendance-container .table {
+        min-width: 520px !important;
+        width: 100% !important;
+    }
+
+    .teacher-dashboard-container .table th,
+    .teacher-dashboard-container .table td,
+    .student-dashboard-container .table th,
+    .student-dashboard-container .table td,
+    .parent-dashboard-container .table th,
+    .parent-dashboard-container .table td {
+        padding: 8px 10px !important;
+        font-size: 0.82rem !important;
+        vertical-align: middle !important;
+    }
+
+    /* Attendance status select touch friendly */
+    .tc-att-status {
+        min-height: 42px !important;
+        font-size: 0.9rem !important;
+        padding: 6px 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Fee summary rows in #ward-fee-summary-container */
+    #ward-fee-summary-container div[style*="justify-content: space-between"],
+    #ward-fee-summary-container div[style*="justify-content:space-between"],
+    #ward-fee-summary-container div[style*="display: flex"] {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 4px !important;
+        padding: 4px 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Linked student buttons in #ward-results-container */
+    #ward-results-container div[style*="flex"] {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        gap: 8px !important;
+        box-sizing: border-box !important;
+    }
+
+    #ward-results-container div[style*="flex"] .btn {
+        width: 100% !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        justify-content: center !important;
+        text-align: center !important;
+    }
+
+    /* Charts - responsive wrappers and height on mobile */
+    .teacher-chart-wrapper,
+    #chart-container-wrapper {
+        position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: 200px !important;
+        min-height: 180px !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    canvas#teacher-analytics-chart,
+    canvas#student-progress-chart {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        display: block !important;
+    }
+
+    /* Bulletins, Announcements, and Complaints list item wrapping */
+    #tc-bulletins-container .announcements-list > div,
+    #stu-latest-announcements-container .announcements-list > div,
+    #ward-bulletins-container > div > div,
+    #tc-complaints-container > div > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
+    }
+
+    #tc-complaints-container div[style*="justify-content: space-between"] {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        align-items: flex-start !important;
+        margin-bottom: 6px !important;
+    }
+
+    /* Action buttons inside list items and containers */
+    #tc-quick-actions-container .btn,
+    #tc-complaints-container .btn,
+    #ward-results-container .btn,
+    #ward-fee-summary-container .btn,
+    #stu-need-assistant-container .btn,
+    #tc-mark-attendance-container button[type="submit"],
+    #tc-upload-materials-container button[type="submit"],
+    .announcements-list .btn {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 46px !important;
+        font-size: 0.92rem !important;
+        padding: 11px 14px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        line-height: 1.35 !important;
+        gap: 8px !important;
+        box-sizing: border-box !important;
+        margin-bottom: 8px !important;
+    }
+
+    /* Academic session banner on mobile */
+    div[style*="border-left: 4px solid var(--brand-primary)"][style*="flex-wrap: wrap"],
+    div[style*="border-left: 4px solid var(--brand-primary)"] {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        padding: 12px 14px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    div[style*="border-left: 4px solid var(--brand-primary)"] > div {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+
+    /* Card hover effects disabled on touch to prevent sticky-hover */
+    .teacher-dashboard-container:hover,
+    .student-dashboard-container:hover,
+    .parent-dashboard-container:hover,
+    #tc-analytics-container:hover,
+    #tc-assigned-courses-container:hover,
+    #tc-attendance-submissions-container:hover,
+    #tc-quick-actions-container:hover,
+    #tc-bulletins-container:hover,
+    #tc-complaints-container:hover,
+    #tc-mark-attendance-container:hover,
+    #tc-attendance-history-container:hover,
+    #tc-assigned-modules-overview-container:hover,
+    #tc-upload-materials-container:hover,
+    #student-chart-card:hover,
+    #stu-recent-attendance-container:hover,
+    #stu-latest-announcements-container:hover,
+    #stu-need-assistant-container:hover,
+    #ward-results-container:hover,
+    #ward-attendance-container:hover,
+    #ward-fee-summary-container:hover,
+    #ward-bulletins-container:hover,
+    .stat-card:hover {
+        transform: none !important;
+        box-shadow: var(--shadow-sm) !important;
+    }
+}
+
+/* -------------------------------------------------------
+   Mobile Auto-Adjusting Layouts: ≤ 480px
+   ------------------------------------------------------- */
+@media (max-width: 480px) {
+
+    .teacher-dashboard-container,
+    .student-dashboard-container,
+    .parent-dashboard-container,
+    #tc-analytics-container,
+    #tc-assigned-courses-container,
+    #tc-attendance-submissions-container,
+    #tc-quick-actions-container,
+    #tc-bulletins-container,
+    #tc-complaints-container,
+    #tc-mark-attendance-container,
+    #tc-attendance-history-container,
+    #tc-assigned-modules-overview-container,
+    #tc-upload-materials-container,
+    #student-chart-card,
+    #stu-recent-attendance-container,
+    #stu-latest-announcements-container,
+    #stu-need-assistant-container,
+    #ward-results-container,
+    #ward-attendance-container,
+    #ward-fee-summary-container,
+    #ward-bulletins-container {
+        padding: 14px 10px !important;
+        margin-bottom: 14px !important;
+    }
+
+    /* Stats grid 2 columns */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    .stat-card {
+        padding: 12px 10px !important;
+    }
+
+    .stat-info h3 {
+        font-size: 1.15rem !important;
+    }
+
+    .stat-info span {
+        font-size: 0.72rem !important;
+    }
+
+    .stat-icon {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 1rem !important;
+    }
+
+    /* Quick action and call to action buttons touch target */
+    #tc-quick-actions-container .btn,
+    #ward-fee-summary-container .btn,
+    #stu-need-assistant-container .btn,
+    #tc-mark-attendance-container button[type="submit"],
+    #tc-upload-materials-container button[type="submit"] {
+        min-height: 48px !important;
+        font-size: 0.9rem !important;
+        padding: 12px 10px !important;
+    }
+
+    /* Linked ward buttons in parent view */
+    #ward-results-container .btn,
+    #ward-attendance-container .btn {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+
+    /* Results filter selects */
+    #res-level-filter,
+    #res-sem-filter,
+    #att-mode-select {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* -------------------------------------------------------
+   Smooth & instant click/tap transitions globally
+   ------------------------------------------------------- */
+.btn {
+    transition: background-color 0.15s ease,
+                color 0.15s ease,
+                border-color 0.15s ease,
+                box-shadow 0.15s ease,
+                transform 0.08s ease !important;
+}
+
+/* Sidebar nav links - instant response */
+.sidebar-link,
+.nav-item a {
+    transition: background 0.1s ease, color 0.1s ease !important;
+}
+
+/* Make stat cards slightly faster on click */
+.stat-card {
+    transition: transform 0.1s ease, box-shadow 0.1s ease !important;
 }

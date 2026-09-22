@@ -404,9 +404,23 @@ class App {
             } else {
 
                 const perms = user.permissions || [];
-                const savedSec = sessionStorage.getItem("isms_admin_section") || (window.location.hash ? window.location.hash.substring(1) : null);
-                const firstSec = savedSec || (perms.includes('users') ? 'users' : perms.includes('academic') ? 'academic' : perms.includes('reg_control') ? 'reg_control' : perms.includes('results') ? 'results' : perms.includes('attendance') ? 'attendance' : perms.includes('finance') ? 'finance' : perms.includes('audit') ? 'audit' : perms.includes('settings') ? 'settings' : perms.includes('backup') ? 'backup' : 'settings');
-                this.navigateToAdminSection(firstSec);
+                const allowedSecs = [];
+                if (perms.includes('users') || perms.includes('STUDENT_MANAGE')) allowedSecs.push('users');
+                if (perms.includes('rbac')) allowedSecs.push('rbac');
+                if (perms.includes('academic') || perms.includes('COURSE_MANAGE')) allowedSecs.push('academic');
+                if (perms.includes('e-library')) allowedSecs.push('e-library');
+                if (perms.includes('reg_control')) allowedSecs.push('reg_control');
+                if (perms.includes('results') || perms.includes('GRADE_APPROVAL')) allowedSecs.push('results');
+                if (perms.includes('attendance')) allowedSecs.push('attendance');
+                if (perms.includes('finance') || perms.includes('FEE_MANAGE')) allowedSecs.push('finance');
+                if (perms.includes('audit')) allowedSecs.push('audit');
+                if (perms.includes('announcements')) allowedSecs.push('announcements');
+                if (perms.includes('settings') || perms.includes('CONFIG_MANAGE')) allowedSecs.push('settings');
+                if (perms.includes('backup')) allowedSecs.push('backup');
+
+                const savedSec = sessionStorage.getItem("isms_admin_section");
+                const targetSec = (savedSec && allowedSecs.includes(savedSec)) ? savedSec : (allowedSecs[0] || 'settings');
+                this.navigateToAdminSection(targetSec);
             }
         } else {
             const savedView = sessionStorage.getItem("isms_current_view") || (window.location.hash ? window.location.hash.substring(1) : "dashboard");

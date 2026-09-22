@@ -104,7 +104,9 @@ const teacherView = {
                         <div class="card-header">
                             <h3><i class="fa-solid fa-chart-simple" style="color: var(--brand-primary);"></i> Attendance & Performance Analytics Container</h3>
                         </div>
-                        <canvas id="teacher-analytics-chart" height="180"></canvas>
+                        <div class="teacher-chart-wrapper" style="position: relative; width: 100%; max-width: 100%; height: 200px; min-height: 180px;">
+                            <canvas id="teacher-analytics-chart"></canvas>
+                        </div>
                     </div>
 
                     
@@ -248,10 +250,17 @@ const teacherView = {
     },
 
     initTeacherChart() {
+        if (this._teacherChart) {
+            try {
+                this._teacherChart.destroy();
+            } catch (e) { }
+            this._teacherChart = null;
+        }
+
         const ctx = document.getElementById("teacher-analytics-chart");
         if (!ctx || typeof Chart === "undefined") return;
 
-        new Chart(ctx, {
+        this._teacherChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
@@ -266,6 +275,7 @@ const teacherView = {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: { y: { beginAtZero: true, max: 100 } }
             }
         });
@@ -281,8 +291,8 @@ const teacherView = {
             <div class="dashboard-grid">
                 <div class="grid-column">
                     
-                    <div class="card">
-                        <div class="card-header">
+                    <div class="card teacher-dashboard-container" id="tc-assigned-modules-overview-container">
+                        <div class="card-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
                             <h3><i class="fa-solid fa-book-bookmark" style="color: var(--brand-primary);"></i> Assigned Semester Course Modules Overview</h3>
                             <span class="badge badge-info"><i class="fa-solid fa-lock"></i> Provisioned by Administrator</span>
                         </div>
@@ -327,7 +337,7 @@ const teacherView = {
 
                 <div class="grid-column">
                     
-                    <div class="card">
+                    <div class="card teacher-dashboard-container" id="tc-upload-materials-container">
                         <div class="card-header">
                             <h3><i class="fa-solid fa-upload" style="color: var(--status-success);"></i> Upload Quiz & Course Materials</h3>
                         </div>
@@ -415,7 +425,7 @@ const teacherView = {
             <div class="dashboard-grid">
                 <div class="grid-column">
                     
-                    <div class="card">
+                    <div class="card teacher-dashboard-container" id="tc-mark-attendance-container">
                         <div class="card-header">
                             <h3><i class="fa-solid fa-clipboard-check" style="color: var(--status-success);"></i> Mark Daily Class Attendance</h3>
                         </div>
@@ -469,7 +479,7 @@ const teacherView = {
 
                 <div class="grid-column">
                     
-                    <div class="card">
+                    <div class="card teacher-dashboard-container" id="tc-attendance-history-container">
                         <div class="card-header">
                             <h3><i class="fa-solid fa-clock-rotate-left" style="color: var(--brand-primary);"></i> Attendance History Lookup</h3>
                         </div>

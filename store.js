@@ -16,6 +16,7 @@ class Store {
                     staff_id: "SUPER-001",
                     permissions: ["ALL"],
                     status: "Active",
+                    password: "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74",
                     avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
                 },
                 {
@@ -28,6 +29,7 @@ class Store {
                     staff_id: "ADM-REG-01",
                     permissions: ["users", "reg_control"],
                     status: "Active",
+                    password: "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74",
                     avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
                 },
                 {
@@ -40,6 +42,7 @@ class Store {
                     staff_id: "ADM-ACA-01",
                     permissions: ["academic", "e-library", "reg_control"],
                     status: "Active",
+                    password: "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74",
                     avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
                 },
                 {
@@ -52,6 +55,7 @@ class Store {
                     staff_id: "ADM-EXA-01",
                     permissions: ["results", "attendance"],
                     status: "Active",
+                    password: "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74",
                     avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
                 },
                 {
@@ -64,6 +68,7 @@ class Store {
                     staff_id: "ADM-FIN-01",
                     permissions: ["finance"],
                     status: "Active",
+                    password: "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74",
                     avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
                 },
                 {
@@ -76,6 +81,7 @@ class Store {
                     staff_id: "ADM-ICT-01",
                     permissions: ["audit", "settings", "rbac", "backup"],
                     status: "Active",
+                    password: "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74",
                     avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
                 },
                 {
@@ -164,7 +170,8 @@ class Store {
                 { id: "adm-sub-1", staff_id: "ADM-REG-01", full_name: "Mrs. Deborah Osei", email: "registrar.admin@isms.edu.gh", phone_number: "+233241000011", role_title: "Registrar Admin", permissions: ["users", "reg_control"], status: "Active", password: "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74" },
                 { id: "adm-sub-2", staff_id: "ADM-ACA-01", full_name: "Dr. Kwame Mensah", email: "academic.admin@isms.edu.gh", phone_number: "+233241000012", role_title: "Academic Admin", permissions: ["academic", "e-library", "reg_control"], status: "Active", password: "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74" },
                 { id: "adm-sub-3", staff_id: "ADM-EXA-01", full_name: "Prof. Albert Kwarteng", email: "exam.admin@isms.edu.gh", phone_number: "+233241000013", role_title: "Examination Admin", permissions: ["results", "attendance"], status: "Active", password: "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74" },
-                { id: "adm-sub-4", staff_id: "ADM-FIN-01", full_name: "Mrs. Sarah Addo", email: "finance.admin@isms.edu.gh", phone_number: "+233241000014", role_title: "Finance Admin", permissions: ["finance"], status: "Active", password: "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74" }
+                { id: "adm-sub-4", staff_id: "ADM-FIN-01", full_name: "Mrs. Sarah Addo", email: "finance.admin@isms.edu.gh", phone_number: "+233241000014", role_title: "Finance Admin", permissions: ["finance"], status: "Active", password: "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74" },
+                { id: "adm-sub-5", staff_id: "ADM-ICT-01", full_name: "Mr. Eric Ansah", email: "ict.admin@isms.edu.gh", phone_number: "+233241000015", role_title: "ICT / System Admin", permissions: ["audit", "settings", "rbac", "backup"], status: "Active", password: "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74" }
             ];
 
             const defaultCourses = [
@@ -355,7 +362,7 @@ class Store {
             if (Array.isArray(list) && list.length > 0) {
                 let modified = false;
                 list.forEach(item => {
-                    if (item && item.password && !item.password.startsWith('sha256$')) {
+                    if (item && (!item.password || !item.password.startsWith('sha256$'))) {
                         item.password = defaultHashedPassword;
                         modified = true;
                     }

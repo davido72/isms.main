@@ -614,10 +614,10 @@ const parentView = {
         const prData = user.parent_data || parent || {};
 
         return `
-            <div class="dashboard-grid parent-dashboard-container">
+            <div class="dashboard-grid">
                 <div class="grid-column">
                     <!-- EDIT PARENT PROFILE & AVATAR PHOTO CARD -->
-                    <div class="card" style="margin-bottom: 20px;">
+                    <div class="card parent-dashboard-container" style="margin-bottom: 20px;">
                         <div class="card-header">
                             <h3><i class="fa-solid fa-user-pen" style="color: var(--status-success);"></i> Edit Parent Profile & Photo</h3>
                         </div>

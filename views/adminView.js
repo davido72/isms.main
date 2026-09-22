@@ -16,14 +16,20 @@ const adminView = {
         const totalCollected = fees.reduce((acc, f) => acc + (f.paid_amount || 0), 0);
         const totalOutstanding = totalExpected - totalCollected;
 
+        const currentUser = store.getCurrentUser() || {};
+        const isSystemAdmin = !currentUser.admin_role_title || currentUser.admin_role_title === "System Admin" || currentUser.admin_role_title === "Super Admin" || currentUser.staff_id === "SUPER-001";
+        const roleBannerTitle = isSystemAdmin ? "SYSTEM ADMIN MASTER WORKSPACE" : `${(currentUser.admin_role_title || 'SUB-ADMIN').toUpperCase()} WORKSPACE`;
+        const bannerHeading = isSystemAdmin ? "Institution-Wide Governance & Administrative Control" : `${currentUser.admin_role_title || 'Sub-Administrator'} Assigned Management Portal`;
+        const bannerSub = isSystemAdmin ? "Full oversight of users, academic operations, registration, finance, and security." : "Assigned departmental governance, administrative operations, and record controls.";
+
         return `
         
             <div style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; padding: 24px; border-radius: var(--radius-lg); margin-bottom: 24px; box-shadow: var(--shadow-lg);">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
                     <div>
-                        <span class="badge badge-success" style="font-size: 0.8rem; letter-spacing: 1px;"><i class="fa-solid fa-crown"></i> SYSTEM ADMIN MASTER WORKSPACE</span>
-                        <h2 style="color: white; margin-top: 6px; font-size: 1.6rem;">Institution-Wide Governance & Administrative Control</h2>
-                        <p style="color: #94a3b8; font-size: 0.88rem;">Full oversight of users, academic operations, registration, finance, and security.</p>
+                        <span class="badge badge-success" style="font-size: 0.8rem; letter-spacing: 1px;"><i class="${isSystemAdmin ? 'fa-solid fa-crown' : 'fa-solid fa-user-shield'}"></i> ${roleBannerTitle}</span>
+                        <h2 style="color: white; margin-top: 6px; font-size: 1.6rem;">${bannerHeading}</h2>
+                        <p style="color: #94a3b8; font-size: 0.88rem;">${bannerSub}</p>
                     </div>
                 </div>
             </div>
