@@ -34,7 +34,7 @@ const validators = {
             if (/^\+233[235789]\d{8}$/.test(cleaned)) {
                 return { valid: true, normalized: cleaned, message: "Valid Ghanaian phone number." };
             }
-            return { valid: false, normalized: "", message: "Invalid Ghanaian phone number format! Examples of valid formats: 0241234567 or +233241234567." };
+            return { valid: false, normalized: "", message: "Invalid Ghanaian phone number format!" };
         }
 
 
@@ -42,7 +42,7 @@ const validators = {
             return { valid: true, normalized: cleaned, message: "Valid international phone number." };
         }
 
-        return { valid: false, normalized: "", message: "Invalid phone number format! Number must contain 9 to 15 digits in E.164 format (e.g. +233241234567)." };
+        return { valid: false, normalized: "", message: "Invalid phone number format!" };
     },
 
     isValidPhone(phone) {

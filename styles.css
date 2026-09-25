@@ -1221,7 +1221,6 @@ h6 {
     background: rgba(37, 99, 235, 0.03);
 }
 
-/* Status Badges */
 .badge {
     padding: 4px 10px;
     border-radius: var(--radius-full);
@@ -1252,7 +1251,6 @@ h6 {
     color: var(--status-info);
 }
 
-/* Modals */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -2077,7 +2075,7 @@ h6 {
         justify-content: space-between !important;
     }
 
-    .printable-header > div:last-child {
+    .printable-header>div:last-child {
         text-align: right !important;
         border-top: none !important;
         padding-top: 0 !important;
@@ -2398,25 +2396,25 @@ body {
         align-items: flex-start;
         padding: 16px;
     }
-    
+
     .results-gpa-display {
         text-align: left;
         margin-top: 8px;
     }
-    
+
     .results-gpa-value {
         font-size: 1.8rem;
     }
-    
-    .btn-label-text { display: none; }
-    .btn-label-short { display: inline !important; }
+
+    .btn-label-text {
+        display: none;
+    }
+
+    .btn-label-short {
+        display: inline !important;
+    }
 }
 
-/* ============================================================
-   COMPREHENSIVE MOBILE RESPONSIVENESS FIXES
-   ============================================================ */
-
-/* Auth screen - mobile full width with proper scrolling */
 @media (max-width: 600px) {
     .auth-screen {
         align-items: flex-start !important;
@@ -2456,7 +2454,6 @@ body {
         padding: 10px 6px !important;
     }
 
-    /* Always preserve icon padding on mobile auth inputs */
     .input-icon-wrapper .form-control {
         padding-left: 40px !important;
     }
@@ -2478,29 +2475,31 @@ body {
     }
 }
 
-/* Main screen mobile layout */
 @media (max-width: 1024px) {
-    /* Ensure main content uses full width when sidebar is off-screen */
+
     .main-content {
         width: 100% !important;
         min-width: 0 !important;
     }
 
-    /* Sidebar overlay backdrop */
+
     .sidebar-backdrop {
         display: none;
         position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        background: rgba(0,0,0,0.45);
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.45);
         z-index: 99;
     }
+
     .sidebar-backdrop.active {
         display: block;
     }
 }
 
-/* Topbar responsive tweaks */
+
 @media (max-width: 480px) {
     .topbar {
         padding: 8px 10px !important;
@@ -2555,7 +2554,6 @@ body {
     }
 }
 
-/* View container full-bleed on very small screens */
 @media (max-width: 360px) {
     .view-container {
         padding: 8px 4px !important;
@@ -2576,39 +2574,43 @@ body {
     }
 }
 
-/* Cards and headings word-break for all mobile */
 @media (max-width: 768px) {
-    h1, h2, h3, h4, h5 {
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
         word-break: break-word !important;
         overflow-wrap: break-word !important;
     }
 
-    p, span, td, th, label {
+    p,
+    span,
+    td,
+    th,
+    label {
         overflow-wrap: break-word;
         word-break: break-word;
     }
 
-    /* Prevent any inline style overrides from breaking layout */
     [style*="width: "],
     [style*="width:"] {
         max-width: 100% !important;
     }
 
-    /* Fix for fixed-width inner containers set via JS */
-    .view-container > div,
-    #view-container > div {
+    .view-container>div,
+    #view-container>div {
         max-width: 100% !important;
         overflow-x: hidden !important;
         box-sizing: border-box !important;
     }
 
-    /* Horizontal scrollable tables get a visual hint */
     .table-responsive::after {
         content: '';
         display: none;
     }
 
-    /* Badge responsiveness */
     .badge {
         font-size: 0.7rem !important;
         padding: 3px 7px !important;
@@ -2617,33 +2619,30 @@ body {
         text-align: center !important;
     }
 
-    /* Buttons in card actions wrap */
-    .card-header > div:last-child,
+    .card-header>div:last-child,
     .card-header-actions {
         flex-wrap: wrap !important;
         gap: 6px !important;
     }
 
-    /* Avatar upload section stacks on mobile */
     .avatar-upload-section {
         flex-direction: column !important;
         align-items: flex-start !important;
         gap: 12px !important;
     }
 
-    /* Fix all unwrapped tables by making .table itself scrollable */
     .table:not(div) {
         display: block !important;
         width: 100% !important;
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch !important;
     }
-    
-    .table th, .table td {
+
+    .table th,
+    .table td {
         white-space: nowrap !important;
     }
 
-    /* Printable document mobile responsiveness */
     #printable-modal {
         padding: 8px 6px !important;
     }
@@ -2674,7 +2673,6 @@ body {
         padding-right: 8px !important;
     }
 
-    /* Close icon positioned prominently at top right side of the page on mobile */
     #printable-modal .modal-close,
     #report-modal .modal-close {
         position: fixed !important;
@@ -2745,7 +2743,7 @@ body {
         font-size: 0.8rem !important;
     }
 
-    .printable-header > div:last-child {
+    .printable-header>div:last-child {
         text-align: left !important;
         width: 100% !important;
         padding-top: 8px !important;
@@ -2827,11 +2825,8 @@ body {
     }
 }
 
-/* =====================================================================
-   SYSTEM ADMINISTRATOR DASHBOARD: OVERVIEW & SUMMARY DESKTOP EXPANSION
-   ===================================================================== */
 @media (min-width: 992px) {
-    /* Main content view container expansion */
+
     .view-container {
         max-width: 100% !important;
         padding: 32px 36px !important;
@@ -2841,7 +2836,6 @@ body {
         width: 100% !important;
     }
 
-    /* KPI Stat Cards Expanded Grid (4 Columns) */
     .admin-kpi-grid {
         display: grid !important;
         grid-template-columns: repeat(4, 1fr) !important;
@@ -2905,7 +2899,6 @@ body {
         flex-shrink: 0 !important;
     }
 
-    /* Live Status Grid Expanded (2 Columns with generous proportions) */
     .admin-status-grid {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
@@ -2945,14 +2938,14 @@ body {
         font-weight: 600 !important;
     }
 
-    /* Departmental Analytics Card Expansion on Desktop */
-    #admin-master-sec-content > .card:last-child {
+
+    #admin-master-sec-content>.card:last-child {
         padding: 28px !important;
         border-radius: var(--radius-lg) !important;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05) !important;
     }
 
-    #admin-master-sec-content > .card:last-child .card-header h3 {
+    #admin-master-sec-content>.card:last-child .card-header h3 {
         font-size: 1.2rem !important;
     }
 
@@ -2991,12 +2984,6 @@ body {
     }
 }
 
-/* =====================================================================
-   DASHBOARD CONTAINERS: COMPREHENSIVE MOBILE RESPONSIVENESS
-   Fixes for Teacher, Student & Parent Dashboard containers
-   ===================================================================== */
-
-/* Ensure student-dashboard-container matches teacher/parent containers */
 .student-dashboard-container {
     background: var(--bg-card);
     max-width: 100%;
@@ -3010,7 +2997,6 @@ body {
     box-sizing: border-box;
 }
 
-/* Fast touch response for ALL interactive elements - no 300ms delay */
 button,
 a,
 [role="button"],
@@ -3035,7 +3021,6 @@ label[for],
     cursor: pointer;
 }
 
-/* Active state visual feedback for instant touch response */
 .btn:active,
 [onclick]:active,
 .nav-item:active,
@@ -3045,11 +3030,7 @@ label[for],
     transition: transform 0.08s ease;
 }
 
-/* -------------------------------------------------------
-   Mobile & Tablet Dynamic Auto-Adjusting Layouts (≤ 991px)
-   ------------------------------------------------------- */
 @media (max-width: 991px) {
-    /* Collapse multi-column grid into a smooth single-column flow */
     .dashboard-grid {
         display: flex !important;
         flex-direction: column !important;
@@ -3074,7 +3055,7 @@ label[for],
         box-sizing: border-box !important;
     }
 
-    /* All 18 dashboard containers auto-adjust to full viewport width */
+
     .teacher-dashboard-container,
     .student-dashboard-container,
     .parent-dashboard-container,
@@ -3107,12 +3088,8 @@ label[for],
     }
 }
 
-/* -------------------------------------------------------
-   Mobile Auto-Adjusting Layouts: ≤ 768px
-   ------------------------------------------------------- */
 @media (max-width: 768px) {
 
-    /* Main view container boundary isolation */
     .view-container,
     #view-container {
         width: 100% !important;
@@ -3122,7 +3099,7 @@ label[for],
         box-sizing: border-box !important;
     }
 
-    /* All dashboard containers mobile padding & isolation */
+
     .teacher-dashboard-container,
     .student-dashboard-container,
     .parent-dashboard-container,
@@ -3154,7 +3131,6 @@ label[for],
         overflow-x: hidden !important;
     }
 
-    /* Card headers inside dashboard containers stack cleanly */
     .teacher-dashboard-container .card-header,
     .student-dashboard-container .card-header,
     .parent-dashboard-container .card-header,
@@ -3186,7 +3162,7 @@ label[for],
         padding-bottom: 10px !important;
     }
 
-    /* Header titles wrap smoothly */
+
     .teacher-dashboard-container .card-header h3,
     .student-dashboard-container .card-header h3,
     .parent-dashboard-container .card-header h3,
@@ -3219,16 +3195,16 @@ label[for],
         width: 100% !important;
     }
 
-    /* Header buttons and badges take full width on mobile */
+
     .teacher-dashboard-container .card-header .btn,
     .student-dashboard-container .card-header .btn,
     .parent-dashboard-container .card-header .btn,
     .teacher-dashboard-container .card-header .badge,
     .student-dashboard-container .card-header .badge,
     .parent-dashboard-container .card-header .badge,
-    .teacher-dashboard-container .card-header > div,
-    .student-dashboard-container .card-header > div,
-    .parent-dashboard-container .card-header > div,
+    .teacher-dashboard-container .card-header>div,
+    .student-dashboard-container .card-header>div,
+    .parent-dashboard-container .card-header>div,
     #tc-assigned-courses-container .card-header .btn,
     #tc-attendance-submissions-container .card-header .btn,
     #stu-recent-attendance-container .card-header .btn,
@@ -3249,7 +3225,7 @@ label[for],
         margin: 0 !important;
     }
 
-    /* Form rows inside attendance, quizzes, and lookup containers stack vertically */
+
     #tc-mark-attendance-container .form-row,
     #tc-attendance-history-container .form-row,
     #tc-upload-materials-container .form-row,
@@ -3288,7 +3264,7 @@ label[for],
         box-sizing: border-box !important;
     }
 
-    /* Table responsive scrolling in all dashboard containers */
+
     .teacher-dashboard-container .table-responsive,
     .student-dashboard-container .table-responsive,
     .parent-dashboard-container .table-responsive,
@@ -3312,14 +3288,14 @@ label[for],
         position: relative !important;
     }
 
-    /* Tables with 3 columns fit without forced 540px width */
+
     #tc-mark-attendance-container .table,
     #stu-recent-attendance-container .table {
         min-width: 100% !important;
         width: 100% !important;
     }
 
-    /* Multi-column tables scroll cleanly inside isolated card */
+
     #tc-assigned-courses-container .table,
     #tc-attendance-submissions-container .table,
     #tc-attendance-history-container .table,
@@ -3340,7 +3316,7 @@ label[for],
         vertical-align: middle !important;
     }
 
-    /* Attendance status select touch friendly */
+
     .tc-att-status {
         min-height: 42px !important;
         font-size: 0.9rem !important;
@@ -3349,7 +3325,7 @@ label[for],
         box-sizing: border-box !important;
     }
 
-    /* Fee summary rows in #ward-fee-summary-container */
+
     #ward-fee-summary-container div[style*="justify-content: space-between"],
     #ward-fee-summary-container div[style*="justify-content:space-between"],
     #ward-fee-summary-container div[style*="display: flex"] {
@@ -3363,7 +3339,6 @@ label[for],
         box-sizing: border-box !important;
     }
 
-    /* Linked student buttons in #ward-results-container */
     #ward-results-container div[style*="flex"] {
         display: flex !important;
         flex-direction: column !important;
@@ -3380,7 +3355,6 @@ label[for],
         text-align: center !important;
     }
 
-    /* Charts - responsive wrappers and height on mobile */
     .teacher-chart-wrapper,
     #chart-container-wrapper {
         position: relative !important;
@@ -3401,11 +3375,10 @@ label[for],
         display: block !important;
     }
 
-    /* Bulletins, Announcements, and Complaints list item wrapping */
-    #tc-bulletins-container .announcements-list > div,
-    #stu-latest-announcements-container .announcements-list > div,
-    #ward-bulletins-container > div > div,
-    #tc-complaints-container > div > div {
+    #tc-bulletins-container .announcements-list>div,
+    #stu-latest-announcements-container .announcements-list>div,
+    #ward-bulletins-container>div>div,
+    #tc-complaints-container>div>div {
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
@@ -3421,7 +3394,7 @@ label[for],
         margin-bottom: 6px !important;
     }
 
-    /* Action buttons inside list items and containers */
+
     #tc-quick-actions-container .btn,
     #tc-complaints-container .btn,
     #ward-results-container .btn,
@@ -3447,7 +3420,7 @@ label[for],
         margin-bottom: 8px !important;
     }
 
-    /* Academic session banner on mobile */
+
     div[style*="border-left: 4px solid var(--brand-primary)"][style*="flex-wrap: wrap"],
     div[style*="border-left: 4px solid var(--brand-primary)"] {
         display: flex !important;
@@ -3460,7 +3433,7 @@ label[for],
         box-sizing: border-box !important;
     }
 
-    div[style*="border-left: 4px solid var(--brand-primary)"] > div {
+    div[style*="border-left: 4px solid var(--brand-primary)"]>div {
         width: 100% !important;
         display: flex !important;
         justify-content: space-between !important;
@@ -3469,7 +3442,7 @@ label[for],
         gap: 6px !important;
     }
 
-    /* Card hover effects disabled on touch to prevent sticky-hover */
+
     .teacher-dashboard-container:hover,
     .student-dashboard-container:hover,
     .parent-dashboard-container:hover,
@@ -3497,9 +3470,6 @@ label[for],
     }
 }
 
-/* -------------------------------------------------------
-   Mobile Auto-Adjusting Layouts: ≤ 480px
-   ------------------------------------------------------- */
 @media (max-width: 480px) {
 
     .teacher-dashboard-container,
@@ -3527,7 +3497,7 @@ label[for],
         margin-bottom: 14px !important;
     }
 
-    /* Stats grid 2 columns */
+
     .stats-grid {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 8px !important;
@@ -3551,7 +3521,7 @@ label[for],
         font-size: 1rem !important;
     }
 
-    /* Quick action and call to action buttons touch target */
+
     #tc-quick-actions-container .btn,
     #ward-fee-summary-container .btn,
     #stu-need-assistant-container .btn,
@@ -3562,14 +3532,14 @@ label[for],
         padding: 12px 10px !important;
     }
 
-    /* Linked ward buttons in parent view */
+
     #ward-results-container .btn,
     #ward-attendance-container .btn {
         width: 100% !important;
         justify-content: center !important;
     }
 
-    /* Results filter selects */
+
     #res-level-filter,
     #res-sem-filter,
     #att-mode-select {
@@ -3578,24 +3548,21 @@ label[for],
     }
 }
 
-/* -------------------------------------------------------
-   Smooth & instant click/tap transitions globally
-   ------------------------------------------------------- */
 .btn {
     transition: background-color 0.15s ease,
-                color 0.15s ease,
-                border-color 0.15s ease,
-                box-shadow 0.15s ease,
-                transform 0.08s ease !important;
+        color 0.15s ease,
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.08s ease !important;
 }
 
-/* Sidebar nav links - instant response */
+
 .sidebar-link,
 .nav-item a {
     transition: background 0.1s ease, color 0.1s ease !important;
 }
 
-/* Make stat cards slightly faster on click */
+
 .stat-card {
     transition: transform 0.1s ease, box-shadow 0.1s ease !important;
 }

@@ -70,7 +70,7 @@
                             <option value="student">Student Portal</option>
                             <option value="teacher">Lecturer / Teacher Portal</option>
                             <option value="parent">Parent / Guardian Portal</option>
-                            <option value="admin">System / Sub-Administrator</option>
+                            <option value="admin">Administrator</option>
                         </select>
                     </div>
 
@@ -98,14 +98,10 @@
                             <input type="checkbox" id="remember-me">
                             <label for="remember-me">Remember session</label>
                         </div>
-                        <div class="forgot-pass-group">
-                            <a href="#" class="auth-link"
-                                onclick="authView.handleForgotPassword(); return false;">Forgot Credentials?</a>
-                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-submit-btn">
-                        <i class="fa-solid fa-right-to-bracket"></i> Sign In to Account
+                        <i class="fa-solid fa-right-to-bracket"></i> Sign In
                     </button>
 
 
@@ -262,7 +258,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-success btn-block btn-lg">
-                            <i class="fa-solid fa-user-plus"></i> Complete Student Registration
+                            <i class="fa-solid fa-user-plus"></i> Create Student Account
                         </button>
 
 
@@ -339,7 +335,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-success btn-block btn-lg">
-                            <i class="fa-solid fa-user-plus"></i> Complete Teacher Registration
+                            <i class="fa-solid fa-user-plus"></i> Create Teacher Account
                         </button>
 
                         <div class="auth-switch-prompt">
@@ -386,7 +382,7 @@
                         </div>
 
                         <button type="submit" class="btn btn-success btn-block btn-lg">
-                            <i class="fa-solid fa-user-plus"></i> Complete Parent Registration
+                            <i class="fa-solid fa-user-plus"></i> Create Parent Account
                         </button>
 
                         <div class="auth-switch-prompt">
@@ -400,7 +396,7 @@
         </div>
 
 
-        <!-- Sidebar backdrop overlay for mobile -->
+
         <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="app.closeSidebar()"></div>
 
         <div id="main-screen" class="main-screen hidden">
@@ -459,7 +455,9 @@
                                 title="View Academic Calendar">
                                 <i class="fa-solid fa-calendar-days"></i> Calendar
                             </button>
-                            <span id="topbar-academic-session" class="badge badge-primary active-academic-session-label" style="font-size: 0.74rem; font-weight: 600; padding: 4px 9px; border-radius: var(--radius-sm);"><i class="fa-solid fa-graduation-cap"></i> 2026/2027 - Semester 1</span>
+                            <span id="topbar-academic-session" class="badge badge-primary active-academic-session-label"
+                                style="font-size: 0.74rem; font-weight: 600; padding: 4px 9px; border-radius: var(--radius-sm);"><i
+                                    class="fa-solid fa-graduation-cap"></i> 2026/2027 - Semester 1</span>
                         </div>
                     </div>
 
@@ -513,20 +511,24 @@
                     </form>
                 </div>
 
-                                <div id="forgot-pass-step2" class="hidden">
+                <div id="forgot-pass-step2" class="hidden">
                     <div id="reset-email-dispatched-banner"
                         style="background: var(--status-success-bg); color: var(--status-success); padding: 14px 16px; border-radius: var(--radius-md); font-size: 0.85rem; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px;">
                         <i class="fa-solid fa-circle-check" style="font-size:1.2rem; margin-top:2px;"></i>
                         <div>
                             <strong>Check your email inbox.</strong><br>
-                            <span style="font-size:0.82rem;">A password reset link has been sent to your registered email address. Click the link in the email to be redirected back here, then set your new password below.</span>
+                            <span style="font-size:0.82rem;">A password reset link has been sent to your registered
+                                email address. Click the link in the email to be redirected back here, then set your new
+                                password below.</span>
                         </div>
                     </div>
                     <form onsubmit="authView.handleCompletePasswordReset(event)">
                         <div class="form-group">
-                            <label for="reset-new-pass">New Password * <small class="text-muted">(Min 6, 1 Upper, 1 Num, 1 Symbol)</small></label>
+                            <label for="reset-new-pass">New Password * <small class="text-muted">(Min 6, 1 Upper, 1 Num,
+                                    1 Symbol)</small></label>
                             <div style="position: relative;">
-                                <input type="password" id="reset-new-pass" class="form-control" required style="padding-right: 42px;">
+                                <input type="password" id="reset-new-pass" class="form-control" required
+                                    style="padding-right: 42px;">
                                 <button type="button"
                                     style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);"
                                     onclick="const i=document.getElementById('reset-new-pass');i.type=i.type==='password'?'text':'password';">
@@ -537,7 +539,8 @@
                         <div class="form-group">
                             <label for="reset-new-pass-repeat">Confirm New Password *</label>
                             <div style="position: relative;">
-                                <input type="password" id="reset-new-pass-repeat" class="form-control" required style="padding-right: 42px;">
+                                <input type="password" id="reset-new-pass-repeat" class="form-control" required
+                                    style="padding-right: 42px;">
                                 <button type="button"
                                     style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-secondary);"
                                     onclick="const i=document.getElementById('reset-new-pass-repeat');i.type=i.type==='password'?'text':'password';">
@@ -550,7 +553,7 @@
                         </button>
                     </form>
                 </div>
-</div>
+            </div>
         </div>
     </div>
 
@@ -662,7 +665,7 @@
                 <h3><i class="fa-solid fa-file-pdf"></i> Official Document PDF Preview</h3>
                 <div class="modal-header-actions">
                     <button class="btn btn-sm btn-primary" onclick="pdfHelper.printCurrentDocument()">
-                        <i class="fa-solid fa-print"></i> Print / Save as PDF
+                        <i class="fa-solid fa-print"></i> Print /Save
                     </button>
                     <button class="modal-close" onclick="app.closeModal('printable-modal')">&times;</button>
                 </div>
@@ -805,8 +808,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 16px;">
-                        <i class="fa-solid fa-floppy-disk"></i> Save Admin Modifications & Synchronize Individual
-                        Dashboard
+                        <i class="fa-solid fa-floppy-disk"></i> Save Changes
                     </button>
                 </form>
             </div>
@@ -915,7 +917,7 @@
                             placeholder="Provide clear reason for grade modification.." required></textarea>
                     </div>
                     <button type="submit" class="btn btn-warning btn-block btn-lg" style="margin-top: 10px;">
-                        <i class="fa-solid fa-file-signature"></i> Record & Log Official Grade Change
+                        <i class="fa-solid fa-file-signature"></i> Record Grade Change
                     </button>
                 </form>
             </div>
@@ -1078,7 +1080,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-block btn-lg">
-                        <i class="fa-solid fa-floppy-disk"></i> Save & Apply Granted Scope
+                        <i class="fa-solid fa-floppy-disk"></i> Save & Apply
                     </button>
                 </form>
             </div>
@@ -1231,7 +1233,7 @@
                             placeholder="e.g. Ph.D. Computer Science">
                     </div>
                     <button type="submit" class="btn btn-primary btn-block btn-lg"><i
-                            class="fa-solid fa-user-shield"></i> Save & Register Teacher Profile</button>
+                            class="fa-solid fa-user-shield"></i> Create Teacher Account</button>
                 </form>
             </div>
         </div>
@@ -1267,7 +1269,7 @@
                             placeholder="e.g. 4211260025">
                     </div>
                     <button type="submit" class="btn btn-primary btn-block btn-lg"><i class="fa-solid fa-user-plus"></i>
-                        Register Guardian Account</button>
+                        Create Parent Account</button>
                 </form>
             </div>
         </div>
@@ -1284,9 +1286,9 @@
             <div class="modal-body">
                 <form onsubmit="adminView.runPaymentVerification(event)">
                     <div class="form-group" style="margin-bottom: 12px;">
-                        <label>Lookup Query (Student ID or Transaction Reference)</label>
+                        <label>Lookup Query (Student ID or Transaction ID)</label>
                         <input type="text" id="pv-search-input" class="form-control" required
-                            placeholder="e.g. STU2025001 or PAY-9923182">
+                            placeholder="e.g. 4211260001 or PAY-9923182">
                     </div>
                     <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-search"></i> Verify
                         Transaction Status</button>
@@ -1495,7 +1497,7 @@
                             placeholder="e.g. 4211260001">
                     </div>
                     <button type="submit" class="btn btn-primary btn-block btn-lg"><i class="fa-solid fa-print"></i>
-                        Generate & Download Official Statement (PDF)</button>
+                        Download Official Statement (PDF)</button>
                 </form>
             </div>
         </div>
@@ -1574,9 +1576,6 @@
             </div>
         </div>
     </div>
-
-
-    <!-- OTP verification modal removed: registration now completes instantly without email OTP -->
 
 
     <script src="config.js"></script>

@@ -64,7 +64,7 @@ const adminView = {
 
 
     startOverviewRealTimePolling() {
-        this.stopOverviewPolling(); // guard: only one interval running
+        this.stopOverviewPolling();
         this._overviewPollInterval = setInterval(() => {
 
             if (document.visibilityState === 'hidden') return;
@@ -166,7 +166,7 @@ const adminView = {
     },
 
     _updateAttendanceStats() {
-        // Only run when the attendance tab is active
+
         if (this.currentTab !== 'attendance') return;
 
         const dept = (document.getElementById('adm-att-dept-filter') || {}).value || 'ALL';
@@ -195,7 +195,7 @@ const adminView = {
         setEl('adm-att-stat-absent', `${stats.absentToday} Students`);
         setEl('adm-att-stat-late', `${stats.lateToday} Students`);
 
-        // Colour the overall rate by threshold
+
         const overallEl = document.getElementById('adm-att-stat-overall');
         if (overallEl) {
             overallEl.style.color = stats.rate >= 75
@@ -231,7 +231,7 @@ const adminView = {
 
         window._adminDeptChart.data.labels = labels;
         window._adminDeptChart.data.datasets[0].data = data;
-        window._adminDeptChart.update('none'); // 'none' = no animation on refresh
+        window._adminDeptChart.update('none');
     },
 
     renderSectionContent() {

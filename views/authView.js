@@ -184,7 +184,7 @@ const authView = {
         const upperId = identifier.toUpperCase();
         const lowerId = identifier.toLowerCase();
 
-        // Auto-detect if user entered an Administrator or Sub-Administrator ID/Email regardless of dropdown role
+
         let effectiveRole = role;
         const allProfiles = store.get("profiles") || [];
         const allAdmins = store.get("admins") || [];
@@ -278,7 +278,7 @@ const authView = {
                 const targetObj = matchedAdmin || matchedProfile;
                 const storedHash = (matchedProfile && matchedProfile.password) || (matchedAdmin && matchedAdmin.password);
 
-                const isValidPassword = 
+                const isValidPassword =
                     (storedHash ? await passwordHelper.verifyPassword(secret, storedHash) : false) ||
                     (await passwordHelper.verifyPassword(secret, "sha256$a1b2c3d4e5f60718293a4b5c6d7e8f90$a812846fbf88cb48c94d3e959ec5702cabdfa33102f4135946b8dcb1f3951e74")) ||
                     secret === "Password@123" ||
@@ -519,7 +519,7 @@ const authView = {
         }
 
         if (!validators.isValidTeacherId(rawStaffId)) {
-            app.showToast("Invalid Teacher Staff ID format! Must use uppercase prefix STF followed by 5 digits (e.g., STF23001).", "danger");
+            app.showToast("Invalid Teacher Staff ID format!", "danger");
             return;
         }
 
@@ -904,7 +904,7 @@ const authView = {
         if (resetEmail) resetEmail.value = "";
     },
 
-    // Called when user lands on app from a password-reset email link
+
     showPasswordResetModal() {
         const modal = document.getElementById("forgot-pass-modal");
         if (modal) modal.classList.remove("hidden");
@@ -912,9 +912,9 @@ const authView = {
         const step2 = document.getElementById("forgot-pass-step2");
         if (step1) step1.classList.add("hidden");
         if (step2) step2.classList.remove("hidden");
-        // Clear URL hash so back-navigation doesn't re-trigger
-        try { history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) {}
-        // Make sure the auth screen is visible
+
+        try { history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) { }
+
         const authScreen = document.getElementById("auth-screen");
         const mainScreen = document.getElementById("main-screen");
         if (authScreen) authScreen.classList.remove("hidden");
@@ -932,7 +932,7 @@ const authView = {
             return;
         }
 
-        // Show loading state
+
         if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…'; }
 
         let result = { success: false, error: 'Supabase client not available.' };
@@ -942,7 +942,7 @@ const authView = {
 
         if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Password Reset Link'; }
 
-        // Intercept any Supabase email rate limit or unconfigured SMTP recovery email errors
+
         if (!result.success && result.error && (
             result.error.toLowerCase().includes('recovery email') ||
             result.error.toLowerCase().includes('rate limit') ||
@@ -955,13 +955,13 @@ const authView = {
 
         if (result.success) {
             this._pendingResetEmail = email;
-            // Swap to confirmation view
+
             const step1 = document.getElementById("forgot-pass-step1");
             const step2 = document.getElementById("forgot-pass-step2");
             if (step1) step1.classList.add("hidden");
             if (step2) {
                 step2.classList.remove("hidden");
-                // Inject a rich confirmation banner into step2 before the form
+
                 const banner = document.getElementById('reset-email-dispatched-banner');
                 if (banner) {
                     banner.innerHTML = `<i class="fa-solid fa-envelope-circle-check" style="font-size:1.4rem;"></i>
@@ -1002,7 +1002,7 @@ const authView = {
             result = await supabaseAuth.updateUserPassword(newPass);
         }
 
-        // If Supabase call failed or client was offline or in fallback mode, update local store
+
         if (!result.success) {
             const targetEmail = this._pendingResetEmail || (store.getCurrentUser() && store.getCurrentUser().email);
             if (targetEmail) {
